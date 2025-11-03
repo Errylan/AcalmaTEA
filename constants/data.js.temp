@@ -1,0 +1,30 @@
+// Dados mockados para expressões
+const expressions = [
+  { term: "Estar com a cabeça nas nuvens", meaning: "Estar distraído, desatento ou sonhando acordado.", example: "Ele não ouviu nada, estava com a cabeça nas nuvens." },
+  // ... restante dos dados de expressões
+];
+
+const motivation = [
+  // ... dados de motivation
+];
+
+const bible = [
+  // ... dados da bíblia
+];
+
+const challenges = {
+  // ... dados de challenges
+};
+
+const regulations = [
+  // ... dados de regulations
+];
+
+// Exporta todas as constantes
+export {
+  expressions,
+  motivation,
+  bible,
+  challenges,
+  regulations
+};

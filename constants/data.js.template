@@ -1,0 +1,13 @@
+const mockChallenges = {
+  understanding: [],
+  group: [],
+  conflict: []
+};
+
+export const data = {
+  expressions: mockExpressions,
+  motivation: mockMotivation,
+  bible: mockBible,
+  challenges: mockChallenges,
+  regulations: mockRegulations
+};
