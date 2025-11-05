@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
@@ -10,28 +10,36 @@ const getRandomItem = (arr = []) => arr && arr.length ? arr[Math.floor(Math.rand
 
 const ComfortScreen = () => {
   const { theme } = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const style = styles(theme);
 
+  const dataMap = useMemo(() => ({
+    motivation: mockMotivation,
+    bible: mockBible,
+  }), []);
+
   const [tab, setTab] = useState('motivation');
-  const [currentItem, setCurrentItem] = useState(getRandomItem(mockMotivation));
+  
+  const [currentItem, setCurrentItem] = useState(() => getRandomItem(dataMap.motivation));
 
   const showNext = useCallback(() => {
     if (tab === 'motivation') {
-      setCurrentItem(getRandomItem(mockMotivation));
+      setCurrentItem(getRandomItem(dataMap.motivation));
     } else {
-      setCurrentItem(getRandomItem(mockBible));
+      setCurrentItem(getRandomItem(dataMap.bible));
     }
-  }, [tab]);
+  }, [tab, dataMap]);
 
   const selectTab = (selectedTab) => {
     setTab(selectedTab);
     if (selectedTab === 'motivation') {
-      setCurrentItem(getRandomItem(mockMotivation));
+      setCurrentItem(getRandomItem(dataMap.motivation));
     } else {
-      setCurrentItem(getRandomItem(mockBible));
+      setCurrentItem(getRandomItem(dataMap.bible));
     }
   };
+
+  const currentLanguage = i18n.language;
 
   return (
     <View style={style.container}>
@@ -54,12 +62,15 @@ const ComfortScreen = () => {
 
       <View style={style.contentContainer}>
         <View style={[style.card, { backgroundColor: theme.accent }]}>
-          <Text style={style.cardText}>{currentItem}</Text>
+          <Text key={currentLanguage + currentItem} style={style.cardText}>
+            {t(currentItem)}
+          </Text>
         </View>
       </View>
 
       <TouchableOpacity style={style.nextButton} onPress={showNext}>
-        <Text style={style.nextButtonText}>{t('next')} ❯</Text>
+        {/* ALTERADO: Seta agora aponta para a esquerda */}
+        <Text style={style.nextButtonText}>❮ {t('next')}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -70,7 +81,9 @@ const styles = (theme) => StyleSheet.create({
     flex: 1,
     backgroundColor: theme.background,
     justifyContent: 'space-between',
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 120, 
   },
   tabContainer: {
     flexDirection: 'row',
@@ -95,7 +108,6 @@ const styles = (theme) => StyleSheet.create({
     color: '#FFFFFF',
   },
   contentContainer: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -114,13 +126,14 @@ const styles = (theme) => StyleSheet.create({
   },
   cardText: {
     fontSize: 22,
-    color: '#333333', // Texto escuro no cartão amarelo
+    color: '#333333',
     textAlign: 'center',
     lineHeight: 30,
     fontWeight: '500',
   },
   nextButton: {
-    alignSelf: 'flex-end',
+    // ALTERADO: de 'flex-end' para 'flex-start'
+    alignSelf: 'flex-start',
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 20,

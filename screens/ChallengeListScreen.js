@@ -1,10 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next'; // Importar
 import { mockChallenges } from '../constants/data';
 
 const ChallengeListScreen = ({ route, navigation }) => {
   const { theme } = useTheme();
+  const { t } = useTranslation(); // Inicializar
   const style = styles(theme);
   const { categoryKey } = route.params;
   const challenges = mockChallenges[categoryKey] || [];
@@ -14,7 +16,11 @@ const ChallengeListScreen = ({ route, navigation }) => {
       style={style.menuItem}
       onPress={() => navigation.navigate('ChallengeDetail', { challenge: item })}
     >
-      <Text style={style.menuText}>{item.title}</Text>
+      {/* LÓGICA HÍBRIDA:
+        Verifica se item.titleKey existe. Se sim, traduz (t(item.titleKey)).
+        Se não, usa o valor antigo (item.title).
+      */}
+      <Text style={style.menuText}>{item.titleKey ? t(item.titleKey) : item.title}</Text>
       <Text style={style.menuArrow}>❯</Text>
     </TouchableOpacity>
   );
@@ -24,7 +30,8 @@ const ChallengeListScreen = ({ route, navigation }) => {
       <FlatList
         data={challenges}
         renderItem={renderItem}
-        keyExtractor={(item) => item.title}
+        // Lógica híbrida para a chave
+        keyExtractor={(item) => item.titleKey || item.title}
         contentContainerStyle={style.list}
       />
     </View>

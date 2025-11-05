@@ -6,36 +6,50 @@ import { useTranslation } from 'react-i18next';
 
 const ChallengeDetailScreen = ({ route }) => {
   const { theme } = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const style = styles(theme);
   const { challenge } = route.params;
 
+  const langKey = i18n.language; 
+
+  const title = challenge.titleKey ? t(challenge.titleKey) : challenge.title;
+  const objective = challenge.objKey ? t(challenge.objKey) : challenge.objective;
+  const steps = challenge.stepKeys 
+    ? challenge.stepKeys.map(key => t(key)) 
+    : challenge.steps; 
+  const extra = challenge.extraKey ? t(challenge.extraKey) : challenge.extra;
+
   return (
-    <ScrollView style={style.container}>
+    <ScrollView 
+      style={style.container} 
+      key={langKey + title}
+      // REMOVIDO: O contentContainerStyle não é mais necessário
+      // contentContainerStyle={{ paddingBottom: 100 }} 
+    >
       <View style={[style.card, { backgroundColor: theme.accent }]}>
         <Text style={style.title}>{t('challenge_title')}</Text>
-        <Text style={style.subtitle}>{challenge.title}</Text>
+        <Text style={style.subtitle}>{title}</Text>
 
         <View style={style.divider} />
 
         <Text style={style.label}>{t('objective')}:</Text>
-        <Text style={style.text}>{challenge.objective}</Text>
+        <Text style={style.text}>{objective}</Text>
 
         <View style={style.divider} />
 
         <Text style={style.label}>{t('instructions')}:</Text>
-        {challenge.steps.map((step, index) => (
+        {steps.map((step, index) => (
           <Text key={index} style={style.stepText}>
-            {/* Atualizado para usar tradução com variável */}
-            <Text style={{fontWeight: 'bold'}}>{t('challenge_step', { num: index + 1 })}</Text>{step}
+            <Text style={{fontWeight: 'bold'}}>{t('challenge_step', { num: index + 1 })}</Text>
+            {step}
           </Text>
         ))}
-
-        {challenge.extra && (
+        
+        {extra && (
           <>
             <View style={style.divider} />
             <Text style={style.label}>{t('extra_tip')}:</Text>
-            <Text style={style.text}>{challenge.extra}</Text>
+            <Text style={style.text}>{extra}</Text>
           </>
         )}
       </View>
@@ -56,13 +70,13 @@ const styles = (theme) => StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#333', 
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 18,
     fontWeight: '500',
-    color: '#333',
+    color: '#333', 
     textAlign: 'center',
     marginBottom: 15,
   },
@@ -74,17 +88,17 @@ const styles = (theme) => StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#333', 
     marginBottom: 5,
   },
   text: {
     fontSize: 15,
-    color: '#333',
+    color: '#333', 
     lineHeight: 22,
   },
   stepText: {
     fontSize: 15,
-    color: '#333',
+    color: '#333', 
     lineHeight: 22,
     marginBottom: 8,
   },

@@ -7,7 +7,7 @@ import { mockExpressions } from '../constants/data';
 
 const ExpressionsScreen = () => {
   const { theme } = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation(); // Pegar o i18n para saber o idioma
   const style = styles(theme);
   const [search, setSearch] = useState('');
 
@@ -21,20 +21,23 @@ const ExpressionsScreen = () => {
     console.log('Total de expressões:', mockExpressions?.length);
     if (!search) return mockExpressions;
     const lowerSearch = search.toLowerCase();
+    
+    // Filtrar com base no texto traduzido
     const filtered = mockExpressions.filter(
       (item) =>
-        item.term.toLowerCase().includes(lowerSearch) ||
-        item.meaning.toLowerCase().includes(lowerSearch)
+        t(item.termKey).toLowerCase().includes(lowerSearch) ||
+        t(item.meaningKey).toLowerCase().includes(lowerSearch)
     );
     console.log('Expressões filtradas:', filtered.length);
     return filtered;
-  }, [search]);
+  }, [search, i18n.language, t]); // Adicionar i18n.language e t como dependências
 
   const renderItem = ({ item }) => (
     <View style={style.card}>
-      <Text style={style.term}>{item.term}</Text>
-      <Text style={style.meaning}><Text style={style.label}>Significado: </Text>{item.meaning}</Text>
-      <Text style={style.example}><Text style={style.label}>Exemplo: </Text>{item.example}</Text>
+      {/* Usar t() para traduzir as chaves */}
+      <Text style={style.term}>{t(item.termKey)}</Text>
+      <Text style={style.meaning}><Text style={style.label}>{t('expressions_meaning')}</Text>{t(item.meaningKey)}</Text>
+      <Text style={style.example}><Text style={style.label}>{t('expressions_example')}</Text>{t(item.exampleKey)}</Text>
     </View>
   );
 
@@ -50,7 +53,8 @@ const ExpressionsScreen = () => {
       <FlatList
         data={filteredData}
         renderItem={renderItem}
-        keyExtractor={(item) => item.term}
+        // Atualizar o keyExtractor para usar a chave do termo
+        keyExtractor={(item) => item.termKey}
         contentContainerStyle={style.list}
       />
     </View>

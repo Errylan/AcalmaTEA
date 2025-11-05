@@ -28,24 +28,31 @@ const SettingsScreen = () => {
       {/* Configuração de Idioma */}
       <View style={style.languageSection}>
         <Text style={style.settingText}>{t('language')}</Text>
-        <TouchableOpacity
-          style={[style.langButton, i18n.language === 'pt' && style.langButtonActive]}
+        <TouchableOpacity 
+          style={[style.langButton, i18n.language === 'pt' && style.langButtonActive]} 
           onPress={() => changeLang('pt')}>
-          {/* Texto atualizado */}
           <Text style={[style.langText, i18n.language === 'pt' && style.langTextActive]}>{t('settings_portuguese')}</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={[style.langButton, i18n.language === 'en' && style.langButtonActive]}
+        <TouchableOpacity 
+          style={[style.langButton, i18n.language === 'en' && style.langButtonActive]} 
           onPress={() => changeLang('en')}>
-          {/* Texto atualizado */}
           <Text style={[style.langText, i18n.language === 'en' && style.langTextActive]}>{t('settings_english')}</Text>
         </TouchableOpacity>
-        {/* Adicionar mais idiomas aqui */}
+        
+        {/* --- ADICIONE ESTE BOTÃO NOVO --- */}
+        <TouchableOpacity 
+          style={[style.langButton, i18n.language === 'es' && style.langButtonActive]} 
+          onPress={() => changeLang('es')}>
+          <Text style={[style.langText, i18n.language === 'es' && style.langTextActive]}>{t('settings_spanish')}</Text>
+        </TouchableOpacity>
+        {/* --- FIM DO BOTÃO NOVO --- */}
+        
       </View>
     </View>
   );
 };
 
+// ... (Estilos permanecem os mesmos)
 const styles = (theme) => StyleSheet.create({
   container: {
     flex: 1,
