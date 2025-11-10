@@ -43,6 +43,7 @@ const ExpressionsScreen = () => {
 
   return (
     <View style={style.container}>
+      
       <TextInput
         style={style.searchBar}
         placeholder={t('search_placeholder')}

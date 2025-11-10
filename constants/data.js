@@ -116,7 +116,7 @@ const challenges = {
     { titleKey: "cha_c_10_title", objKey: "cha_c_10_obj", stepKeys: ["cha_c_10_step1", "cha_c_10_step2", "cha_c_10_step3"], extraKey: "cha_c_10_extra" },
     { titleKey: "cha_c_11_title", objKey: "cha_c_11_obj", stepKeys: ["cha_c_11_step1", "cha_c_11_step2", "cha_c_11_step3"], extraKey: "cha_c_11_extra" },
     { titleKey: "cha_c_12_title", objKey: "cha_c_12_obj", stepKeys: ["cha_c_12_step1", "cha_c_12_step2", "cha_c_12_step3", "cha_c_12_step4"], extraKey: "cha_c_12_extra" },
-    { titleKey: "cha_c_13_title", objKey: "cha_c_13_obj", stepKeys: ["cha_c_13_step1", "cha_c_13_step2", "cha_c_13_step3", "cha_c_13_step4"], extraKey: "cha_c_13_extra" },
+    { titleKey: "cha_c_13_title", objKey: "cha_c_13_obj", stepKeys: ["cha_c_13_step1", "cha_c_13_step2", "cha_c_13_step3"], extraKey: "cha_c_13_extra" },
     { titleKey: "cha_c_14_title", objKey: "cha_c_14_obj", stepKeys: ["cha_c_14_step1", "cha_c_14_step2", "cha_c_14_step3"], extraKey: "cha_c_14_extra" },
     { titleKey: "cha_c_15_title", objKey: "cha_c_15_obj", stepKeys: ["cha_c_15_step1", "cha_c_15_step2", "cha_c_15_step3", "cha_c_15_step4"], extraKey: "cha_c_15_extra" },
     { titleKey: "cha_c_16_title", objKey: "cha_c_16_obj", stepKeys: ["cha_c_16_step1", "cha_c_16_step2", "cha_c_16_step3"], extraKey: "cha_c_16_extra" },
@@ -269,7 +269,8 @@ const regulations = [
   { titleKey: "reg_66_title", descKey: "reg_66_desc", stepKeys: ["reg_66_step1", "reg_66_step2", "reg_66_step3", "reg_66_step4"] },
   { titleKey: "reg_67_title", descKey: "reg_67_desc", stepKeys: ["reg_67_step1", "reg_67_step2", "reg_67_step3", "reg_67_step4", "reg_67_step5"] },
   { titleKey: "reg_68_title", descKey: "reg_68_desc", stepKeys: ["reg_68_step1", "reg_68_step2", "reg_68_step3", "reg_68_step4"] },
-  { titleKey: "reg_69_title", descKey: "reg_69_desc", stepKeys: ["reg_69_step1", "reg_69_step2", "reg_69_step3", "reg_69_step4", "reg_69_step5", "reg_69_step6"] }
+  { titleKey: "reg_69_title", descKey: "reg_69_desc", stepKeys: ["reg_69_step1", "reg_69_step2", "reg_69_step3", "reg_69_step4", "reg_69_step5", "reg_69_step6"] },
+  { titleKey: "reg_70_title", descKey: "reg_70_desc", stepKeys: ["reg_70_step1", "reg_70_step2", "reg_70_step3", "reg_70_step4", "reg_70_step5"] }
   
 
 

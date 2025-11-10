@@ -1,9 +1,11 @@
-import React, { useState, useRef } from 'react';
+// App.js
+
+import React, { useState, useRef, useEffect } from 'react'; 
 import { NavigationContainer, useNavigationContainerRef } from '@react-navigation/native'; 
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { View, StyleSheet } from 'react-native'; 
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'; 
 import { ThemeProvider, useTheme } from './context/ThemeContext';
-// 1. Importar o hook 'useTranslation'
 import { I18nextProvider, useTranslation } from 'react-i18next'; 
 import i18n from './services/i18n';
 import HomeScreen from './screens/HomeScreen';
@@ -15,9 +17,16 @@ import SocialSkillsNavigator from './navigation/SocialSkillsNavigator';
 import PotiAssistant from './components/PotiAssistant';
 import 'react-native-gesture-handler'; 
 
+// --- MUDANÇA: IMPORTAR O QUE PRECISAMOS ---
+import SplashScreen from './screens/SplashScreen';
+import OnboardingScreen from './screens/OnboardingScreen'; // Importar Onboarding
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Importar AsyncStorage
+// --- FIM DA MUDANÇA ---
+
 const Drawer = createDrawerNavigator();
 
 const getActiveRouteName = (state) => {
+  // ... (código existente sem alteração)
   if (!state) {
     return 'Home'; // Padrão
   }
@@ -35,15 +44,18 @@ const styles = StyleSheet.create({
   },
 });
 
+// --- O SEU AppContent (O APP PRINCIPAL) FICA INTOCADO ---
 const AppContent = () => {
   const { theme } = useTheme();
-  // 2. Inicializar o hook 't'
   const { t } = useTranslation(); 
   const [routeName, setRouteName] = useState('Home');
   const navigationRef = useNavigationContainerRef();
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView 
+      style={[styles.container, { backgroundColor: theme.background }]} 
+      edges={['top', 'left', 'right']}
+    > 
       <NavigationContainer
         ref={navigationRef}
         onReady={() => {
@@ -63,7 +75,6 @@ const AppContent = () => {
             headerTintColor: '#FFFFFF', 
           }}>
           
-          {/* 3. Mudar todas as chamadas de 'i18n.t(...)' para apenas 't(...)' */}
           <Drawer.Screen name="Home" component={HomeScreen} options={{ title: t('app_title_home') }} />
           <Drawer.Screen name="Expressions" component={ExpressionsScreen} options={{ title: t('app_title_expressions') }} />
           <Drawer.Screen name="Comfort" component={ComfortScreen} options={{ title: t('app_title_comfort') }} />
@@ -74,17 +85,62 @@ const AppContent = () => {
       </NavigationContainer>
       
       <PotiAssistant activeScreen={routeName} />
-    </View>
+    </SafeAreaView> 
   );
 };
 
+// --- O App FOI MODIFICADO PARA CONTROLAR O SPLASH E ONBOARDING ---
 const App = () => {
+  // 1. Adiciona um estado de 'carregamento'
+  const [isLoading, setIsLoading] = useState(true);
+  // MUDANÇA: Adiciona estado de onboarding
+  const [hasOnboarded, setHasOnboarded] = useState(false); 
+
+  useEffect(() => {
+    // MUDANÇA: Lógica para verificar o AsyncStorage
+    const checkOnboarding = async () => {
+      try {
+        const value = await AsyncStorage.getItem('hasOnboarded');
+        if (value !== null) {
+          setHasOnboarded(true);
+        }
+      } catch (e) {
+        console.log('Failed to load onboarding status.', e);
+      } finally {
+        // Mantém seu timer original de 2.5s para o splash
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 2500); 
+      }
+    };
+    checkOnboarding();
+  }, []);
+
+  // MUDANÇA: Função para o OnboardingScreen chamar
+  const handleOnboardingComplete = async () => {
+    try {
+      await AsyncStorage.setItem('hasOnboarded', 'true');
+      setHasOnboarded(true); // Atualiza o estado para re-renderizar
+    } catch (e) {
+      console.log('Failed to save onboarding status.', e);
+    }
+  };
+
   return (
-    <I18nextProvider i18n={i18n}>
-      <ThemeProvider>
-        <AppContent />
-      </ThemeProvider>
-    </I18nextProvider>
+    <SafeAreaProvider> 
+      <I18nextProvider i18n={i18n}>
+        <ThemeProvider>
+          {/* 3. Lógica de renderização atualizada */}
+          {isLoading ? (
+            <SplashScreen /> 
+          ) : !hasOnboarded ? ( // MUDANÇA: Verifica se já viu o onboarding
+            <OnboardingScreen onComplete={handleOnboardingComplete} />
+          ) : (
+            <AppContent /> 
+          )}
+        </ThemeProvider>
+      </I18nextProvider>
+    </SafeAreaProvider> 
   );
 };
 

@@ -1413,9 +1413,16 @@ const resources = {
       'reg_69_step4': "4. Notice the initial taste. Roll it on your tongue.",
       'reg_69_step5': "5. Chew very slowly, noticing how the flavor changes.",
       'reg_69_step6': "6. Focus on it until you swallow.",
+      'reg_70_title': "Progressive Muscle Relaxation",
+      'reg_70_desc': "Conscious muscle tension and relaxation.",
+      'reg_70_step1': "1. Sit or lie down comfortably.",
+      'reg_70_step2': "2. Start with your feet: tense the muscles in your feet for 5 seconds.",
+      'reg_70_step3': "3. Release the tension and feel the relaxation for 10 seconds.",
+      'reg_70_step4': "4. Move up to your legs, abdomen, arms, shoulders, neck, and face, repeating the process.",
+      'reg_70_step5': "5. Finish by breathing deeply and feeling your body relax.",
+
       // --- NOVAS CHAVES DO POTI ---
-      'poti_default': "Hi! I'm Poti. Choose an option from the menu to get started.",
-      'poti_Home': "This is the main menu. You can explore the app from here!",
+      'poti_Home': "Hi! I'm Poti. Welcome to AcalmaTEA! This is the main menu. You can explore the app from here!",
       'poti_Expressions': "Here you can search for popular sayings and slang. Type in the bar to find one!",
       'poti_Comfort': "Feeling down? Choose a category and tap 'Next' to see a comforting message.",
       'poti_SocialSkills': "Let's practice! Choose a skill category you want to develop.", // Rota do Navegador
@@ -1423,9 +1430,35 @@ const resources = {
       'poti_ChallengeList': "Great! Now, choose one of these challenges to see the details.",
       'poti_ChallengeDetail': "Here's the plan! Read the objective and the steps. You can do this!",
       'poti_Regulation': "Feeling overwhelmed? These are exercises to help you self-regulate. Tap one to see the steps.",
-      'poti_Settings': "This is the settings screen. You can change the theme or language here."
-      
-      
+      'poti_Settings': "This is the settings screen. You can change the theme or language here.",
+      // --- NOVAS CHAVES PARA OS HEADERS DO NAVEGADOR ---
+      'app_title_social_menu': 'Social Skills',
+      'app_title_challenge_list': 'Challenges',
+      'app_title_challenge_detail': 'Challenge Detail',
+      'onboarding_title_1': 'Welcome to AcalmaTEA!',
+      'onboarding_desc_1': 'An app made by autistic people, for autistic people. Focusing on young and adult neurodivergent individuals, it offers support during crises, from shutdowns (introspective crises) to meltdowns (explosive crises). Let\'s get to know the tools that can help.',
+      'onboarding_title_2': 'Understand Expressions',
+      'onboarding_desc_2': 'Find a list of popular sayings and slang to help make communication clearer.',
+      'onboarding_title_3': 'Find Your Comfort',
+      'onboarding_desc_3': 'In moments of distress, access motivational or biblical messages to find your peace.',
+      'onboarding_title_4': 'Practice Social Skills',
+      'onboarding_desc_4': 'Explore practical, step-by-step challenges to develop your social interactions.',
+      'onboarding_title_5': 'Self-Regulation Tools',
+      'onboarding_desc_5': 'Feeling overwhelmed? Use sensory and breathing exercises to find your balance.',
+      'onboarding_title_6': 'Customize Your App',
+      'onboarding_desc_6': 'Change the app\'s theme (Dark/Light) and language to make it feel like home.',
+      'onboarding_title_7': 'Meet Poti, Your Assistant',
+      'onboarding_desc_7': 'I am Poti! I\'ll appear on each screen to give you tips on how to use the app.',
+      'onboarding_title_8': 'Ready to Start?',
+      'onboarding_desc_8': 'Your journey of self-care and growth begins now. We are with you!',
+      'onboarding_finish': 'Finish',
+      'onboarding_skip': 'Skip',
+      'home_search_placeholder': 'Search a feature (e.g., "Comfort")',
+      'home_search_no_results': 'No results for "{{query}}"',
+
+
+
+
     }
   },
   pt: {
@@ -2377,7 +2410,7 @@ const resources = {
       'cha_f_20_step2': "Sugira: 'Acho que não estamos conseguindo nos entender. Podemos pedir para [pessoa neutra - gerente, professor, amigo em comum] nos ajudar a conversar?'",
       'cha_f_20_step3': "Isso mostra maturidade em querer resolver o problema.",
       'cha_f_20_extra': "O mediador não 'escolhe um lado', ele ajuda a comunicação.",
-// --- NOVAS: Autorregulação (Itens 1-20) ---
+      // --- NOVAS: Autorregulação (Itens 1-20) ---
       'reg_01_title': "Respiração Quadrada",
       'reg_01_desc': "Ajuda a focar e acalmar o sistema nervoso.",
       'reg_01_step1': "1. Inspire lentamente contando até 4.",
@@ -2838,9 +2871,15 @@ const resources = {
       'reg_69_step4': "4. Note o sabor inicial. Role-a na língua.",
       'reg_69_step5': "5. Mastigue muito lentamente, notando como o sabor muda.",
       'reg_69_step6': "6. Foque nisso até engolir.",
+      'reg_70_title': "Relaxamento Muscular Progressivo",
+      'reg_70_desc': "Tensão e relaxamento muscular consciente.",
+      'reg_70_step1': "1. Sente-se ou deite-se confortavelmente.",
+      'reg_70_step2': "2. Comece pelos pés: tencione os músculos dos pés por 5 segundos.",
+      'reg_70_step3': "3. Solte a tensão e sinta o relaxamento por 10 segundos.",
+      'reg_70_step4': "4. Suba para as pernas, abdômen, braços, ombros, pescoço e rosto, repetindo o processo.",
+      'reg_70_step5': "5. Termine respirando profundamente e sentindo o corpo relaxado.",
       // --- NOVAS CHAVES DO POTI ---
-      'poti_default': 'Olá! Sou o Poti. Escolha uma opção no menu para começar.',
-      'poti_Home': 'Este é o menu principal. Você pode explorar o app a partir daqui!',
+      'poti_Home': 'Olá! Sou o Poti. Bem-vindo ao AcalmaTEA! Este é o menu principal. Você pode explorar o app a partir daqui!',
       'poti_Expressions': 'Aqui você pode buscar por ditados e gírias. Digite na barra para encontrar!',
       'poti_Comfort': 'Precisando de conforto? Escolha uma categoria e toque em "Próximo" para ver uma mensagem.',
       'poti_SocialSkills': 'Vamos praticar! Escolha uma categoria de habilidade que você quer desenvolver.', // Rota do Navegador
@@ -2849,9 +2888,37 @@ const resources = {
       'poti_ChallengeDetail': 'Aqui está o plano! Leia o objetivo e os passos. Você consegue!',
       'poti_Regulation': 'Se sentindo sobrecarregado? Estes são exercícios para te ajudar a se autorregular. Toque em um para ver os passos.',
       'poti_Settings': 'Esta é a tela de configurações. Você pode mudar o tema ou o idioma aqui.',
-    
-      
-      
+      // --- NOVAS CHAVES PARA OS HEADERS DO NAVEGADOR ---
+      'app_title_social_menu': 'Habilidades Sociais',
+      'app_title_challenge_list': 'Desafios',
+      'app_title_challenge_detail': 'Detalhe do Desafio',
+      // Dentro de pt: { translation: { ... } }
+      'onboarding_title_1': 'Bem-vindo(a) ao AcalmaTEA!',
+      'onboarding_desc_1': 'Um app feito por autistas, para autistas. Com foco no público neurodivergente jovem e adulto, ele oferece auxílio em crises. Desde shutdowns (Crises introspectivas) até meltdowns (Crises Explosivas) . Vamos conhecer as ferramentas que podem ajudar.',
+      'onboarding_title_2': 'Entenda Expressões',
+      'onboarding_desc_2': 'Encontre uma lista de ditados populares e gírias para ajudar a tornar a comunicação mais clara.',
+      'onboarding_title_3': 'Encontre seu Conforto',
+      'onboarding_desc_3': 'Em momentos de angústia, acesse mensagens motivacionais ou bíblicas para encontrar sua paz.',
+      'onboarding_title_4': 'Pratique Habilidades Sociais',
+      'onboarding_desc_4': 'Explore desafios práticos com passo a passo para desenvolver suas interações sociais.',
+      'onboarding_title_5': 'Ferramentas de Autorregulação',
+      'onboarding_desc_5': 'Sentindo-se sobrecarregado? Use exercícios sensoriais e de respiração para encontrar seu equilíbrio.',
+      'onboarding_title_6': 'Personalize seu App',
+      'onboarding_desc_6': 'Altere o tema (Escuro/Claro) e o idioma do aplicativo para que ele fique com a sua cara.',
+      'onboarding_title_7': 'Conheça o Poti, seu Assistente',
+      'onboarding_desc_7': 'Eu sou o Poti! Vou aparecer em cada tela para dar dicas de como usar o app.',
+      'onboarding_title_8': 'Pronto(a) para Começar?',
+      'onboarding_desc_8': 'Sua jornada de autocuidado e crescimento começa agora. Estamos com você!',
+      'onboarding_finish': 'Concluir',
+      'onboarding_skip': 'Pular',
+      'home_search_placeholder': 'Buscar uma função (ex: "Conforto")',
+      'home_search_no_results': 'Nenhum resultado para "{{query}}"',
+
+
+
+
+
+
     }
   },
 
@@ -2901,8 +2968,7 @@ const resources = {
       'challenge_step': 'Paso {{num}}: ',
 
       // --- Falas do Poti ---
-      'poti_default': '¡Hola! Soy Poti. Elige una opción del menú para empezar.',
-      'poti_Home': 'Este es el menú principal. ¡Puedes explorar la app desde aquí!',
+      'poti_Home': '¡Hola! Soy Poti.¡Bienvenido a AcalmaTEA! Este es el menú principal. ¡Puedes explorar la app desde aquí!',
       'poti_Expressions': 'Aquí puedes buscar dichos populares y jerga. ¡Escribe en la barra para encontrar uno!',
       'poti_Comfort': '¿Necesitas consuelo? Elige una categoría y toca "Siguiente" para ver un mensaje.',
       'poti_SocialSkills': '¡Vamos a practicar! Elige una categoría de habilidad que quieras desarrollar.',
@@ -2911,7 +2977,7 @@ const resources = {
       'poti_ChallengeDetail': '¡Aquí está el plan! Lee el objetivo y los pasos. ¡Tú puedes!',
       'poti_Regulation': '¿Te sientes abrumado? Estos son ejercicios para ayudarte a autorregularte. Toca uno para ver los pasos.',
       'poti_Settings': 'Esta es la pantalla de configuración. Puedes cambiar el tema o el idioma aquí.',
-      
+
       'exp_head_clouds_term': "Tener la cabeza en las nubes",
       'exp_head_clouds_meaning': "Estar distraído, desatento o soñando despierto.",
       'exp_head_clouds_example': "No escuchó nada, tenía la cabeza en las nubes.",
@@ -4306,7 +4372,40 @@ const resources = {
       'reg_69_step3': "3. Ponlo en tu boca, pero no mastiques.",
       'reg_69_step4': "4. Nota el sabor inicial. Pásalo por tu lengua.",
       'reg_69_step5': "5. Mastica muy lentamente, notando cómo cambia el sabor.",
-      'reg_69_step6': "6. Enfócate en eso hasta que tragues."
+      'reg_69_step6': "6. Enfócate en eso hasta que tragues.",
+      'reg_70_title': "Relajación Muscular Progresiva",
+      'reg_70_desc': "Tensión y relajación muscular consciente.",
+      'reg_70_step1': "1. Siéntese o acuéstese cómodamente.",
+      'reg_70_step2': "2. Comience por los pies: tense los músculos de los pies durante 5 segundos.",
+      'reg_70_step3': "3. Libere la tensión y sienta la relajación durante 10 segundos.",
+      'reg_70_step4': "4. Continúe con las piernas, el abdomen, los brazos, los hombros, el cuello y la cara, repitiendo el proceso.",
+      'reg_70_step5': "5. Finalice respirando profundamente y sintiendo cómo se relaja su cuerpo.",
+      // --- NOVAS CHAVES PARA OS HEADERS DO NAVEGADOR ---
+      'app_title_social_menu': 'Habilidades Sociales',
+      'app_title_challenge_list': 'Desafíos',
+      'app_title_challenge_detail': 'Detalle del Desafío',
+
+      // Dentro de es: { translation: { ... } }
+      'onboarding_title_1': '¡Bienvenido(a) a AcalmaTEA!',
+      'onboarding_desc_1': 'Una aplicación creada por personas autistas, para personas autistas. Centrada en jóvenes y adultos neurodivergentes, ofrece apoyo durante las crisis, desde shutdowns (crisis introspectivas) hasta meltdowns (crisis explosivas). Conozcamos las herramientas que pueden ayudarte.',
+      'onboarding_title_2': 'Entiende Expresiones',
+      'onboarding_desc_2': 'Encuentra una lista de dichos populares y jergas para ayudar a que la comunicación sea más clara.',
+      'onboarding_title_3': 'Encuentra tu Calma',
+      'onboarding_desc_3': 'En momentos de angustia, accede a mensajes motivacionales o bíblicos para encontrar tu paz.',
+      'onboarding_title_4': 'Practica Habilidades Sociales',
+      'onboarding_desc_4': 'Explora desafíos prácticos paso a paso para desarrollar tus interacciones sociales.',
+      'onboarding_title_5': 'Herramientas de Autorregulación',
+      'onboarding_desc_5': '¿Te sientes abrumado? Usa ejercicios sensoriales y de respiración para encontrar tu equilibrio.',
+      'onboarding_title_6': 'Personaliza tu App',
+      'onboarding_desc_6': 'Cambia el tema (Oscuro/Claro) y el idioma de la aplicación para que se sienta como en casa.',
+      'onboarding_title_7': 'Conoce a Poti, tu Asistente',
+      'onboarding_desc_7': '¡Soy Poti! Apareceré en cada pantalla para darte consejos sobre cómo usar la app.',
+      'onboarding_title_8': '¿Listo(a) para Empezar?',
+      'onboarding_desc_8': 'Tu viaje de autocuidado y crecimiento comienza ahora. ¡Estamos contigo!',
+      'onboarding_finish': 'Finalizar',
+      'onboarding_skip': 'Saltar',
+      'home_search_placeholder': 'Buscar una función (ej: "Calma")',
+      'home_search_no_results': 'No hay resultados para "{{query}}"',
 
     }
   },

@@ -1,9 +1,11 @@
 import React, { useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
+import { View, Text, StyleSheet, Animated, Image } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const screenToTextKey = {
+// ... (sem alterações aqui) ...
   'Home': 'poti_Home',
   'Expressions': 'poti_Expressions',
   'Comfort': 'poti_Comfort',
@@ -15,15 +17,16 @@ const screenToTextKey = {
   'Settings': 'poti_Settings',
 };
 
-// 1. Lista das telas onde o Poti deve ficar NO TOPO
 const specialPositionScreens = [ 
-  'ChallengeDetail'
+  // 'ChallengeDetail' // REMOVIDO: Para que o Poti vá para o canto inferior
 ];
 
 const PotiAssistant = ({ activeScreen }) => {
+// ... (sem alterações na lógica do componente) ...
   const { theme } = useTheme();
   const { t } = useTranslation();
   const popAnim = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     popAnim.setValue(0); 
@@ -39,15 +42,16 @@ const PotiAssistant = ({ activeScreen }) => {
 
   const textKey = screenToTextKey[activeScreen] || 'poti_default';
 
-  // 2. Lógica para decidir o estilo de posicionamento
   const useSpecialPosition = specialPositionScreens.includes(activeScreen);
 
-  // 3. Combina os estilos
   const containerStyle = [
-    style.container, // Estilo base (position: 'absolute', etc.)
+    style.container, 
     useSpecialPosition 
-      ? style.containerTopRight // Posição NO TOPO
-      : style.containerBottomRight, // Posição PADRÃO (embaixo)
+      ? style.containerTopRight
+      : [
+          style.containerBottomLeft, 
+          { bottom: insets.bottom + 20 }
+        ],
     { 
       opacity: popAnim, 
       transform: [{ scale: popAnim }] 
@@ -55,14 +59,19 @@ const PotiAssistant = ({ activeScreen }) => {
   ];
 
   return (
-    // 4. Usa o 'containerStyle' dinâmico
     <Animated.View 
       style={containerStyle}
     >
+      {/* --- ALTERAÇÃO: Imagem vem PRIMEIRO --- */}
+      <Image 
+        source={require('../assets/poti-avatar.png')} // Caminho para a imagem
+        style={style.characterImage} // Usamos o novo estilo
+      />
+
+      {/* --- ALTERAÇÃO: Balão vem DEPOIS --- */}
       <View style={style.bubble}>
         <Text style={style.bubbleText}>{t(textKey)}</Text>
       </View>
-      <Text style={style.character}>👦</Text>
     </Animated.View>
   );
 };
@@ -71,34 +80,40 @@ const PotiAssistant = ({ activeScreen }) => {
 const styles = (theme) => StyleSheet.create({
   container: {
     position: 'absolute',
-    alignItems: 'flex-end',
-    zIndex: 10, // Garante que ele fique por cima
+    // --- ALTERAÇÕES ---
+    flexDirection: 'row', // 1. Faz os itens ficarem lado a lado
+    alignItems: 'flex-end', // 2. Alinha os itens em baixo (imagem e balão)
+    // --- FIM ---
+    zIndex: 10, 
   },
-  // 5. Estilo para a posição PADRÃO (embaixo)
-  containerBottomRight: {
-    bottom: 20,
-    right: 20,
+  containerBottomLeft: { 
+    left: 20, 
   },
-  // 6. Estilo para a posição ESPECIAL (em cima)
   containerTopRight: {
     top: 20,
     right: 20,
   },
-  character: {
-    fontSize: 60,
-    marginTop: -10,
+  characterImage: {
+    width: 80, 
+    height: 80, 
+    resizeMode: 'contain',
+    // marginTop: -10, // 3. Removemos o margin negativo
   },
   bubble: {
     backgroundColor: theme.card,
     padding: 12,
     borderRadius: 15,
-    borderBottomRightRadius: 0,
+    borderBottomLeftRadius: 0, // 4. O "rabicho" aponta para a esquerda (para a imagem)
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
     maxWidth: 200,
+    // 5. Adiciona espaço entre a imagem e o balão
+    marginLeft: 8, 
+    // 6. Levanta o balão um pouco para o "rabicho" apontar para o Poti
+    marginBottom: 10,
   },
   bubbleText: {
     color: theme.text,

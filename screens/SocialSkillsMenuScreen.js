@@ -1,17 +1,15 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
-import { useTranslation } from 'react-i18next'; // Importar useTranslation
+import { useTranslation } from 'react-i18next'; // 1. Importar o hook
 import { mockChallenges } from '../constants/data';
-
-// O objeto categoryNames foi removido.
 
 const SocialSkillsMenuScreen = ({ navigation }) => {
   const { theme } = useTheme();
-  const { t } = useTranslation(); // Inicializar o hook
+  const { t } = useTranslation(); // 2. Inicializar o 't'
   const style = styles(theme);
   
-  // Mapear chaves para as chaves de tradução
+  // 3. Mapear chaves de dados para chaves de tradução
   const categoryKeyMap = {
     basic: 'social_basic',
     communication: 'social_communication',
@@ -22,15 +20,18 @@ const SocialSkillsMenuScreen = ({ navigation }) => {
 
   const categories = Object.keys(mockChallenges || {}).map(key => ({
     key: key,
-    // Usar t() para obter o título traduzido
+    // 4. Traduzir o título da categoria
     title: t(categoryKeyMap[key] || key), 
   }));
 
   const renderItem = ({ item }) => (
     <TouchableOpacity 
       style={style.menuItem}
-      // Passar o título traduzido para a próxima tela
-      onPress={() => navigation.navigate('ChallengeList', { categoryKey: item.key, title: item.title })}
+      // 5. Passar o título já traduzido para o header da próxima tela
+      onPress={() => navigation.navigate('ChallengeList', { 
+        categoryKey: item.key, 
+        title: item.title 
+      })}
     >
       <Text style={style.menuText}>{item.title}</Text>
       <Text style={style.menuArrow}>❯</Text>
@@ -39,6 +40,7 @@ const SocialSkillsMenuScreen = ({ navigation }) => {
 
   return (
     <View style={style.container}>
+      {/* O título duplicado "Habilidades Sociais" foi removido daqui */}
       <FlatList
         data={categories}
         renderItem={renderItem}

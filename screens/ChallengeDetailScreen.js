@@ -23,8 +23,8 @@ const ChallengeDetailScreen = ({ route }) => {
     <ScrollView 
       style={style.container} 
       key={langKey + title}
-      // REMOVIDO: O contentContainerStyle não é mais necessário
-      // contentContainerStyle={{ paddingBottom: 100 }} 
+      // ADICIONADO: Espaço no final para o Poti não cobrir o conteúdo
+      contentContainerStyle={{ paddingBottom: 140 }} 
     >
       <View style={[style.card, { backgroundColor: theme.accent }]}>
         <Text style={style.title}>{t('challenge_title')}</Text>
