@@ -25,8 +25,7 @@ import SplashScreen from './screens/SplashScreen';
 import OnboardingScreen from './screens/OnboardingScreen'; // Importar Onboarding
 import RewardsScreen from './screens/RewardsScreen'; // Importar Recompensas
 import MoodDiaryScreen from './screens/MoodDiaryScreen'; // <<< IMPORTAR DIÁRIO DE HUMOR
-// --- MUDANÇA: AsyncStorage não é mais necessário para esta lógica ---
-// import AsyncStorage from '@react-native-async-storage/async-storage'; 
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Importar AsyncStorage
 // --- FIM DA MUDANÇA ---
 
 const Drawer = createDrawerNavigator();
@@ -83,7 +82,7 @@ const AppContent = () => {
           
           <Drawer.Screen name="Home" component={HomeScreen} options={{ title: t('app_title_home') }} />
           
-          {/* --- TELA DE DIÁRIO DE HUMOR ADICIONADA --- */}
+          {/* --- MUDANÇA: TELA DE DIÁRIO DE HUMOR ADICIONADA --- */}
           <Drawer.Screen 
             name="MoodDiary" 
             component={MoodDiaryScreen} 
@@ -113,36 +112,49 @@ const AppContent = () => {
 
 // --- O App FOI MODIFICADO PARA CONTROLAR O SPLASH E ONBOARDING ---
 const App = () => {
+  // ... (toda a sua lógica de isLoading/hasOnboarded continua a mesma)
   const [isLoading, setIsLoading] = useState(true);
-  // MUDANÇA: O estado 'hasOnboarded' agora é só para esta sessão.
-  // Ele sempre começará como 'false' quando o app abrir.
   const [hasOnboarded, setHasOnboarded] = useState(false); 
 
   useEffect(() => {
-    // MUDANÇA: Não precisamos mais verificar o AsyncStorage.
-    // Apenas rodamos o timer do Splash.
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2500); 
-  }, []); // O array de dependências fica vazio
+    const checkOnboarding = async () => {
+      try {
+        const value = await AsyncStorage.getItem('hasOnboarded');
+        if (value !== null) {
+          setHasOnboarded(true);
+        }
+      } catch (e) {
+        console.log('Failed to load onboarding status.', e);
+      } finally {
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 2500); 
+      }
+    };
+    checkOnboarding();
+  }, []);
 
-  // MUDANÇA: Função simplificada. Não grava mais no AsyncStorage.
-  const handleOnboardingComplete = () => {
-    setHasOnboarded(true); // Apenas atualiza o estado da sessão
+  const handleOnboardingComplete = async () => {
+    try {
+      await AsyncStorage.setItem('hasOnboarded', 'true');
+      setHasOnboarded(true); 
+    } catch (e) {
+      console.log('Failed to save onboarding status.', e);
+    }
   };
+  // ... (fim da lógica que não mudou)
 
   return (
     <SafeAreaProvider> 
       <I18nextProvider i18n={i18n}>
         <ThemeProvider>
           <UserDataProvider>
-            {/* 3. Lógica de renderização atualizada */}
             {isLoading ? (
-              <SplashScreen /> // 1. Mostra o Splash
-            ) : !hasOnboarded ? ( // 2. Depois mostra o Onboarding
+              <SplashScreen /> 
+            ) : !hasOnboarded ? ( 
               <OnboardingScreen onComplete={handleOnboardingComplete} />
             ) : (
-              <AppContent /> // 3. Depois mostra o App principal
+              <AppContent /> 
             )}
           </UserDataProvider>
         </ThemeProvider>
