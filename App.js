@@ -6,6 +6,9 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { View, StyleSheet } from 'react-native'; 
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'; 
 import { ThemeProvider, useTheme } from './context/ThemeContext';
+// --- MUDANÇA: Importar o UserDataProvider ---
+import { UserDataProvider } from './context/UserDataContext';
+// --- FIM DA MUDANÇA ---
 import { I18nextProvider, useTranslation } from 'react-i18next'; 
 import i18n from './services/i18n';
 import HomeScreen from './screens/HomeScreen';
@@ -20,7 +23,10 @@ import 'react-native-gesture-handler';
 // --- MUDANÇA: IMPORTAR O QUE PRECISAMOS ---
 import SplashScreen from './screens/SplashScreen';
 import OnboardingScreen from './screens/OnboardingScreen'; // Importar Onboarding
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Importar AsyncStorage
+import RewardsScreen from './screens/RewardsScreen'; // Importar Recompensas
+import MoodDiaryScreen from './screens/MoodDiaryScreen'; // <<< IMPORTAR DIÁRIO DE HUMOR
+// --- MUDANÇA: AsyncStorage não é mais necessário para esta lógica ---
+// import AsyncStorage from '@react-native-async-storage/async-storage'; 
 // --- FIM DA MUDANÇA ---
 
 const Drawer = createDrawerNavigator();
@@ -76,10 +82,26 @@ const AppContent = () => {
           }}>
           
           <Drawer.Screen name="Home" component={HomeScreen} options={{ title: t('app_title_home') }} />
+          
+          {/* --- TELA DE DIÁRIO DE HUMOR ADICIONADA --- */}
+          <Drawer.Screen 
+            name="MoodDiary" 
+            component={MoodDiaryScreen} 
+            options={{ title: t('app_title_mood_diary') }} // Nova chave de tradução
+          />
+          {/* --- FIM DA MUDANÇA --- */}
+
           <Drawer.Screen name="Expressions" component={ExpressionsScreen} options={{ title: t('app_title_expressions') }} />
           <Drawer.Screen name="Comfort" component={ComfortScreen} options={{ title: t('app_title_comfort') }} />
           <Drawer.Screen name="SocialSkills" component={SocialSkillsNavigator} options={{ title: t('app_title_social_nav') }} />
           <Drawer.Screen name="Regulation" component={RegulationScreen} options={{ title: t('app_title_regulation') }} />
+          
+          <Drawer.Screen 
+            name="Rewards" 
+            component={RewardsScreen} 
+            options={{ title: t('app_title_rewards') }} 
+          />
+          
           <Drawer.Screen name="Settings" component={SettingsScreen} options={{ title: t('app_title_settings') }} />
         </Drawer.Navigator>
       </NavigationContainer>
@@ -91,53 +113,38 @@ const AppContent = () => {
 
 // --- O App FOI MODIFICADO PARA CONTROLAR O SPLASH E ONBOARDING ---
 const App = () => {
-  // 1. Adiciona um estado de 'carregamento'
   const [isLoading, setIsLoading] = useState(true);
-  // MUDANÇA: Adiciona estado de onboarding
+  // MUDANÇA: O estado 'hasOnboarded' agora é só para esta sessão.
+  // Ele sempre começará como 'false' quando o app abrir.
   const [hasOnboarded, setHasOnboarded] = useState(false); 
 
   useEffect(() => {
-    // MUDANÇA: Lógica para verificar o AsyncStorage
-    const checkOnboarding = async () => {
-      try {
-        const value = await AsyncStorage.getItem('hasOnboarded');
-        if (value !== null) {
-          setHasOnboarded(true);
-        }
-      } catch (e) {
-        console.log('Failed to load onboarding status.', e);
-      } finally {
-        // Mantém seu timer original de 2.5s para o splash
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 2500); 
-      }
-    };
-    checkOnboarding();
-  }, []);
+    // MUDANÇA: Não precisamos mais verificar o AsyncStorage.
+    // Apenas rodamos o timer do Splash.
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 2500); 
+  }, []); // O array de dependências fica vazio
 
-  // MUDANÇA: Função para o OnboardingScreen chamar
-  const handleOnboardingComplete = async () => {
-    try {
-      await AsyncStorage.setItem('hasOnboarded', 'true');
-      setHasOnboarded(true); // Atualiza o estado para re-renderizar
-    } catch (e) {
-      console.log('Failed to save onboarding status.', e);
-    }
+  // MUDANÇA: Função simplificada. Não grava mais no AsyncStorage.
+  const handleOnboardingComplete = () => {
+    setHasOnboarded(true); // Apenas atualiza o estado da sessão
   };
 
   return (
     <SafeAreaProvider> 
       <I18nextProvider i18n={i18n}>
         <ThemeProvider>
-          {/* 3. Lógica de renderização atualizada */}
-          {isLoading ? (
-            <SplashScreen /> 
-          ) : !hasOnboarded ? ( // MUDANÇA: Verifica se já viu o onboarding
-            <OnboardingScreen onComplete={handleOnboardingComplete} />
-          ) : (
-            <AppContent /> 
-          )}
+          <UserDataProvider>
+            {/* 3. Lógica de renderização atualizada */}
+            {isLoading ? (
+              <SplashScreen /> // 1. Mostra o Splash
+            ) : !hasOnboarded ? ( // 2. Depois mostra o Onboarding
+              <OnboardingScreen onComplete={handleOnboardingComplete} />
+            ) : (
+              <AppContent /> // 3. Depois mostra o App principal
+            )}
+          </UserDataProvider>
         </ThemeProvider>
       </I18nextProvider>
     </SafeAreaProvider> 

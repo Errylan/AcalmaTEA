@@ -27,7 +27,7 @@ const slidesData = [
   },
   {
     id: '2',
-    image: require('../assets/Expressions.jpg'), 
+    image: require('../assets/expressions.jpg'), 
     titleKey: 'onboarding_title_2',
     descKey: 'onboarding_desc_2',
   },
@@ -39,7 +39,7 @@ const slidesData = [
   },
     {
     id: '4',
-    image: require('../assets/challenge.jpg'), 
+    image: require('../assets/challenges.jpg'), 
     titleKey: 'onboarding_title_4',
     descKey: 'onboarding_desc_4',
     },
@@ -51,22 +51,37 @@ const slidesData = [
     },
     {
     id: '6',
-    image: require('../assets/settings.jpg'), 
+    image: require('../assets/rewards.jpg'), 
     titleKey: 'onboarding_title_6',
     descKey: 'onboarding_desc_6',
     },
     {
     id: '7',
-    image: require('../assets/avatar.jpg'), 
+    image: require('../assets/mood.jpg'), 
     titleKey: 'onboarding_title_7',
     descKey: 'onboarding_desc_7',
     },
     {
     id: '8',
-    image: require('../assets/Homescreen.jpg'), 
+    image: require('../assets/settings.jpg'), 
     titleKey: 'onboarding_title_8',
     descKey: 'onboarding_desc_8',
-    }
+    },
+    {
+    id: '9',
+    image: require('../assets/avatar.jpg'), 
+    titleKey: 'onboarding_title_9',
+    descKey: 'onboarding_desc_9',
+    },
+    {
+    id: '10',
+    image: require('../assets/homescreen.jpg'), 
+    titleKey: 'onboarding_title_10',
+    descKey: 'onboarding_desc_10',
+    },
+    
+
+    
 ];
 
 // Componente SlideItem (sem alteração)

@@ -1,15 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
-import { useTranslation } from 'react-i18next'; // 1. Importar o hook
+import { useTranslation } from 'react-i18next';
 import { mockChallenges } from '../constants/data';
 
 const SocialSkillsMenuScreen = ({ navigation }) => {
   const { theme } = useTheme();
-  const { t } = useTranslation(); // 2. Inicializar o 't'
+  const { t } = useTranslation();
   const style = styles(theme);
   
-  // 3. Mapear chaves de dados para chaves de tradução
   const categoryKeyMap = {
     basic: 'social_basic',
     communication: 'social_communication',
@@ -18,16 +17,24 @@ const SocialSkillsMenuScreen = ({ navigation }) => {
     conflict: 'social_conflict',
   };
 
+  // Pega as categorias normais
   const categories = Object.keys(mockChallenges || {}).map(key => ({
     key: key,
-    // 4. Traduzir o título da categoria
     title: t(categoryKeyMap[key] || key), 
   }));
+
+  // --- MUDANÇA: Adicionar "Favoritos" no topo da lista ---
+  categories.unshift({
+    key: 'favorites', // Chave especial
+    title: t('social_favorites'), // Nova chave de tradução
+  });
+  // --- FIM DA MUDANÇA ---
 
   const renderItem = ({ item }) => (
     <TouchableOpacity 
       style={style.menuItem}
-      // 5. Passar o título já traduzido para o header da próxima tela
+      // Navega para a ChallengeList, passando a chave da categoria
+      // (que agora pode ser 'favorites')
       onPress={() => navigation.navigate('ChallengeList', { 
         categoryKey: item.key, 
         title: item.title 
@@ -40,7 +47,6 @@ const SocialSkillsMenuScreen = ({ navigation }) => {
 
   return (
     <View style={style.container}>
-      {/* O título duplicado "Habilidades Sociais" foi removido daqui */}
       <FlatList
         data={categories}
         renderItem={renderItem}
