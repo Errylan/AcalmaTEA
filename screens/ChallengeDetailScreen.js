@@ -1,14 +1,22 @@
+// screens/ChallengeDetailScreen.js
 import React, { useLayoutEffect, useState } from 'react';
-// 1. Importar SafeAreaView
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Alert,  } from 'react-native';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  ScrollView, 
+  TouchableOpacity, 
+  Modal, 
+  Alert 
+} from 'react-native';
 import { useTheme } from '../context/ThemeContext';
+// 1. O 'useTranslation' SÓ é preciso para os textos da UI (botões, modal)
 import { useTranslation } from 'react-i18next';
 import { useUser } from '../context/UserDataContext'; 
 import { useNavigation } from '@react-navigation/native'; 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-
-// ... (Componente HeaderFavoriteButton não muda) ...
+// Componente HeaderFavoriteButton (Não muda)
 const HeaderFavoriteButton = ({ challengeId, theme }) => {
   const { isFavorite, toggleFavorite } = useUser();
   const favorite = isFavorite(challengeId);
@@ -23,26 +31,26 @@ const HeaderFavoriteButton = ({ challengeId, theme }) => {
 };
 
 const ChallengeDetailScreen = ({ route }) => {
-  // ... (Toda a lógica interna não muda) ...
   const { theme } = useTheme();
-  const { t, i18n } = useTranslation();
+  // 't' ainda é usado para 'objetivo', 'instruções', 'dica extra', etc.
+  const { t } = useTranslation(); 
   const style = styles(theme);
-  const { challenge } = route.params;
   const navigation = useNavigation();
   
+  // 2. RECEBER O DESAFIO JÁ TRADUZIDO
+  // O 'challenge' que vem dos route.params agora tem { id, title, objective, steps, extra, category }
+  const { challenge } = route.params;
+  
   const { addXp, markChallengeCompleted, getChallengeCompletion } = useUser();
-  const challengeId = challenge.titleKey; 
+  
+  // 3. O ID agora vem de 'challenge.id'
+  const challengeId = challenge.id; 
   
   const completionStatus = getChallengeCompletion(challengeId);
-  
   const [modalVisible, setModalVisible] = useState(false);
 
-  const langKey = i18n.language; 
-  const title = challenge.titleKey ? t(challenge.titleKey) : challenge.title;
-  const objective = challenge.objKey ? t(challenge.objKey) : challenge.objective;
-  const steps = challenge.stepKeys ? challenge.stepKeys.map(key => t(key)) : challenge.steps; 
-  const extra = challenge.extraKey ? t(challenge.extraKey) : challenge.extra;
-
+  // 4. ATUALIZAR O BOTÃO DE FAVORITO
+  // Usamos o 'challenge.id' (que é a antiga 'titleKey')
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
@@ -51,16 +59,15 @@ const ChallengeDetailScreen = ({ route }) => {
     });
   }, [navigation, challengeId, theme]);
 
+  // Funções handleCompleteChallenge e handleSelectDifficulty (Não mudam)
   const handleCompleteChallenge = () => {
     setModalVisible(true);
   };
   
   const handleSelectDifficulty = (difficulty) => {
     const xpGained = 10; 
-    
     markChallengeCompleted(challengeId, difficulty);
     addXp(xpGained);
-    
     setModalVisible(false);
     
     Alert.alert(
@@ -70,34 +77,41 @@ const ChallengeDetailScreen = ({ route }) => {
   };
 
   return (
-    // 2. Substituir o ScrollView principal por SafeAreaView
     <SafeAreaView style={style.container}>
       <ScrollView 
-        contentContainerStyle={{ padding: 20, paddingBottom: 140 }} // Adicionei padding aqui
+        contentContainerStyle={{ padding: 20, paddingBottom: 140 }}
       >
         <View style={[style.card, { backgroundColor: theme.accent }]}>
           <Text style={style.title}>{t('challenge_title')}</Text>
-          <Text style={style.subtitle}>{title}</Text>
+          
+          {/* 5. MOSTRAR OS DADOS DIRETAMENTE (SEM 't()') */}
+          <Text style={style.subtitle}>{challenge.title}</Text>
           <View style={style.divider} />
           <Text style={style.label}>{t('objective')}:</Text>
-          <Text style={style.text}>{objective}</Text>
+          <Text style={style.text}>{challenge.objective}</Text>
           <View style={style.divider} />
+          
           <Text style={style.label}>{t('instructions')}:</Text>
-          {steps.map((step, index) => (
+          {/* 'challenge.steps' já é um array de strings traduzidas */}
+          {challenge.steps.map((step, index) => (
             <Text key={index} style={style.stepText}>
+              {/* O 't()' só é preciso para o "Passo X:" */}
               <Text style={{fontWeight: 'bold'}}>{t('challenge_step', { num: index + 1 })}</Text>
               {step}
             </Text>
           ))}
-          {extra && (
+          
+          {/* Mostra a dica extra se ela existir */}
+          {challenge.extra && (
             <>
               <View style={style.divider} />
               <Text style={style.label}>{t('extra_tip')}:</Text>
-              <Text style={style.text}>{extra}</Text>
+              <Text style={style.text}>{challenge.extra}</Text>
             </>
           )}
         </View>
 
+        {/* O resto do ecrã (botão de completar, modal) não muda */}
         <View style={style.completionContainer}>
           {!completionStatus ? (
             <TouchableOpacity 
@@ -111,6 +125,7 @@ const ChallengeDetailScreen = ({ route }) => {
           )}
         </View>
         
+        {/* Modal (não muda) */}
         <Modal
           transparent={true}
           animationType="fade"
@@ -156,17 +171,16 @@ const ChallengeDetailScreen = ({ route }) => {
   );
 };
 
+// ... (Cole os seus estilos originais aqui)
 const styles = (theme) => StyleSheet.create({
   container: {
-    flex: 1, // <--- Esta linha é importante
+    flex: 1,
     backgroundColor: theme.background,
-    // Removido o padding, pois foi para o contentContainer do ScrollView
   },
   card: {
     borderRadius: 20,
     padding: 25,
   },
-  // ... (restante dos estilos não muda)
   title: {
     fontSize: 24,
     fontWeight: 'bold',

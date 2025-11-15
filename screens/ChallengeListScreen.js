@@ -1,53 +1,161 @@
-import React, { useMemo } from 'react';
-// 1. Importar SafeAreaView e remover View
-import { Text, StyleSheet, TouchableOpacity, FlatList, } from 'react-native';
+// screens/ChallengeListScreen.js
+import React, { useMemo, useState, useEffect } from 'react';
+import { 
+  Text, 
+  StyleSheet, 
+  TouchableOpacity, 
+  FlatList,
+  ActivityIndicator,
+  View
+} from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
-import { mockChallenges } from '../constants/data';
 import { useUser } from '../context/UserDataContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// 1. IMPORTAR DADOS LOCAIS E NETINFO
+import { useNetInfo } from '@react-native-community/netinfo';
+import { mockChallenges } from '../constants/data';
+import i18nInstance from '../services/i18n';
 
-const STATUS_EMOJI = {
-  'easy': '😊',
-  'medium': '😐',
-  'hard': '😟',
+// 2. DEFINIR API E CACHE
+const API_URL = 'https://acalmatea-api.vercel.app/api/challenges'; // MUDE PARA O SEU URL
+const CACHE_KEY_PREFIX = 'cached_all_challenges_';
+
+// 3. FUNÇÃO DE DADOS "DE FÁBRICA" (OFFLINE)
+// Esta função traduz todo o objeto mockChallenges
+const getFactoryData = (lang) => {
+  const translations = i18nInstance.getResourceBundle(lang, 'translation');
+  if (!translations) return {};
+
+  const t = (key) => translations[key] || `[${key}]`;
+  const allChallenges = {};
+
+  // Itera sobre cada categoria (basic, communication, etc.)
+  for (const [category, challengesRaw] of Object.entries(mockChallenges)) {
+    // Traduz cada desafio dentro da categoria
+    allChallenges[category] = challengesRaw.map(item => ({
+      id: item.titleKey, // ID único
+      title: t(item.titleKey),
+      objective: t(item.objKey),
+      steps: item.stepKeys.map(stepKey => t(stepKey)), // Traduz o array de passos
+      extra: item.extraKey ? t(item.extraKey) : null,
+      category: category, // Adiciona a categoria ao próprio objeto
+    }));
+  }
+  return allChallenges; // Retorna o objeto { basic: [...], communication: [...] }
 };
+
+// --- Componentes Auxiliares (Não mudam) ---
+const STATUS_EMOJI = { 'easy': '😊', 'medium': '😐', 'hard': '😟' };
+
+const EmptyList = ({ textKey, t }) => {
+  const style = styles(useTheme().theme);
+  return (
+    <Text style={style.emptyText}>
+      {t(textKey)}
+    </Text>
+  );
+};
+// --- Fim dos Componentes Auxiliares ---
+
 
 const ChallengeListScreen = ({ route, navigation }) => {
   const { theme } = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const style = styles(theme);
-  const { categoryKey } = route.params;
+  const { categoryKey } = route.params; // ex: "basic" ou "favorites"
   
   const { isFavorite, getChallengeCompletion } = useUser();
-
-  const challenges = useMemo(() => {
-    if (categoryKey === 'favorites') {
-      const allChallenges = Object.values(mockChallenges).flat();
-      return allChallenges.filter(challenge => isFavorite(challenge.titleKey));
-    }
-    return mockChallenges[categoryKey] || [];
-  }, [categoryKey, isFavorite]);
   
+  // 4. ESTADOS PARA OS DADOS
+  const [isLoading, setIsLoading] = useState(true);
+  const [allChallenges, setAllChallenges] = useState({}); // Guarda o objeto { basic: [...], ... }
 
-  const EmptyList = () => (
-    <Text style={style.emptyText}>
-      {categoryKey === 'favorites' 
-        ? t('favorites_empty_cha') 
-        : t('favorites_empty_generic')}
-    </Text>
-  );
+  const netInfo = useNetInfo(); // Hook do NetInfo
+  const currentLang = i18n.language;
+  const CACHE_KEY = `${CACHE_KEY_PREFIX}${currentLang}`;
 
+  // 5. LÓGICA "OFFLINE-FIRST"
+  useEffect(() => {
+    const loadData = async () => {
+      let initialData = {};
+      setIsLoading(true);
+
+      // 1. Tentar Cache
+      try {
+        const cachedDataString = await AsyncStorage.getItem(CACHE_KEY);
+        if (cachedDataString) {
+          initialData = JSON.parse(cachedDataString);
+        }
+      } catch (e) { console.error("Erro ao ler cache de desafios:", e); }
+
+      // 2. Se falhar, usar dados de fábrica
+      if (Object.keys(initialData).length === 0) {
+        initialData = getFactoryData(currentLang);
+      }
+
+      // 3. Mostrar dados offline
+      setAllChallenges(initialData);
+      setIsLoading(false);
+
+      // 4. Tentar atualizar em segundo plano
+      if (netInfo.isConnected === false) {
+        console.log("(Challenges) Rede offline. Não vou buscar atualizações.");
+        return; // Sai da função
+      }
+
+      try {
+        console.log("(Challenges) Rede online. Tentando buscar atualizações...");
+        const response = await fetch(`${API_URL}?lang=${currentLang}`);
+        if (!response.ok) throw new Error('Falha na rede');
+        
+        const newData = await response.json();
+        
+        if (JSON.stringify(newData) !== JSON.stringify(initialData)) {
+          console.log("(Challenges) Novos dados de desafios encontrados! Atualizando...");
+          setAllChallenges(newData);
+          await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(newData));
+        } else {
+          console.log("(Challenges) Dados de desafios já estão atualizados.");
+        }
+      } catch (e) {
+        console.log("Não foi possível buscar atualizações de desafios.");
+      }
+    };
+
+    loadData();
+  }, [currentLang, CACHE_KEY, netInfo.isConnected]); // Adiciona netInfo.isConnected
+
+  // 6. LÓGICA DE FILTRAGEM (useMemo)
+  // Esta lógica agora funciona com o objeto 'allChallenges'
+  const challenges = useMemo(() => {
+    // Junta todos os desafios de todas as categorias num único array
+    const allItems = Object.values(allChallenges).flat(); 
+
+    if (categoryKey === 'favorites') {
+      // Filtra todos os itens que estão marcados como favoritos
+      return allItems.filter(challenge => isFavorite(challenge.id));
+    }
+    
+    // Se não for favoritos, filtra pela categoria que veio da rota
+    return allItems.filter(challenge => challenge.category === categoryKey);
+    
+  }, [categoryKey, isFavorite, allChallenges]);
+  
+  // 7. RENDER ITEM (Simplificado)
+  // Agora só mostra os dados. Não traduz nada.
   const renderItem = ({ item }) => {
-    const completionStatus = getChallengeCompletion(item.titleKey);
+    const completionStatus = getChallengeCompletion(item.id); // Usa item.id
 
     return (
       <TouchableOpacity 
         style={style.menuItem}
+        // Passa o 'item' JÁ TRADUZIDO para o ecrã de detalhe
         onPress={() => navigation.navigate('ChallengeDetail', { challenge: item })}
       >
-        <Text style={style.menuText}>{item.titleKey ? t(item.titleKey) : item.title}</Text>
+        <Text style={style.menuText}>{item.title}</Text>
         
         {completionStatus ? (
           <Text style={style.emojiText}>{STATUS_EMOJI[completionStatus] || '✅'}</Text>
@@ -58,24 +166,33 @@ const ChallengeListScreen = ({ route, navigation }) => {
     );
   };
 
+  // 8. RENDERIZAÇÃO FINAL (com Loading)
   return (
-    // 2. Substituir <View> por <SafeAreaView>
     <SafeAreaView style={style.container}>
-      <FlatList
-        data={challenges}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.titleKey || item.title}
-        contentContainerStyle={style.list}
-        ListEmptyComponent={<EmptyList />} 
-      />
+      {isLoading ? (
+        <ActivityIndicator size="large" color={theme.primary} style={{ marginTop: 20 }}/>
+      ) : (
+        <FlatList
+          data={challenges}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={style.list}
+          ListEmptyComponent={
+            <EmptyList 
+              t={t}
+              textKey={categoryKey === 'favorites' ? "favorites_empty_cha" : "favorites_empty_generic"} 
+            />
+          } 
+        />
+      )}
     </SafeAreaView>
   );
 };
 
-
+// ... (Cole os seus estilos originais aqui)
 const styles = (theme) => StyleSheet.create({
   container: {
-    flex: 1, // <--- Esta linha é importante
+    flex: 1,
     backgroundColor: theme.background,
   },
   list: {
