@@ -1,19 +1,20 @@
 // screens/RewardsScreen.js
-import React, { useMemo } from 'react';
+import React from 'react';
 import { 
   View, 
   Text, 
   StyleSheet, 
   FlatList, 
   TouchableOpacity, 
-  Alert 
+  Alert,
+   
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
-import { useUser } from '../context/UserDataContext'; // 1. Importar o hook useUser
+import { useUser } from '../context/UserDataContext'; // Importar o hook useUser
 
-// 2. Lista de Recompensas (como planejamos)
-// Adicionamos 'titleKey' para tradução e 'icon'
+// Lista de Recompensas
 const REWARDS_LIST = [
   // Categoria: Acessórios
   { id: 'oculos_sol', cost: 100, titleKey: 'reward_sunglasses', icon: '🕶️' },
@@ -51,7 +52,7 @@ const StoreHeader = ({ xp, theme, t }) => {
 };
 
 // Componente para cada Item da Loja
-const RewardItem = ({ item, xp, onBuy, isOwned, theme, t }) => {
+const RewardItem = ({ item, xp, onBuy, isOwned, isEquipped, onEquip, onUnequip, theme, t }) => {
   const style = styles(theme);
   const canAfford = xp >= item.cost;
   
@@ -62,19 +63,43 @@ const RewardItem = ({ item, xp, onBuy, isOwned, theme, t }) => {
         <Text style={style.itemTitle}>{t(item.titleKey)}</Text>
         <Text style={style.itemCost}>{t('rewards_cost', { cost: item.cost })}</Text>
       </View>
-      <TouchableOpacity
-        style={[
-          style.buyButton,
-          isOwned && style.buyButtonOwned,
-          !isOwned && !canAfford && style.buyButtonDisabled,
-        ]}
-        disabled={isOwned || !canAfford}
-        onPress={() => onBuy(item)}
-      >
-        <Text style={style.buyButtonText}>
-          {isOwned ? t('rewards_owned_button') : t('rewards_buy_button')}
-        </Text>
-      </TouchableOpacity>
+
+      {/* --- LÓGICA DOS BOTÕES ATUALIZADA --- */}
+      {isOwned ? (
+        isEquipped ? (
+          // Já tem e está equipado -> Botão "Remover"
+          <TouchableOpacity
+            style={[style.buyButton, style.buyButtonOwned]} // Botão cinza
+            onPress={() => onUnequip(item.id)}
+          >
+            <Text style={style.buyButtonText}>{t('rewards_unequip_button')}</Text>
+          </TouchableOpacity>
+        ) : (
+          // Já tem, mas não está equipado -> Botão "Equipar"
+          <TouchableOpacity
+            style={style.buyButton} // Botão azul
+            onPress={() => onEquip(item.id)}
+          >
+            <Text style={style.buyButtonText}>{t('rewards_equip_button')}</Text>
+          </TouchableOpacity>
+        )
+      ) : (
+        // Não tem o item -> Lógica de "Comprar"
+        <TouchableOpacity
+          style={[
+            style.buyButton,
+            !canAfford && style.buyButtonDisabled, // Botão desativado
+          ]}
+          disabled={!canAfford}
+          onPress={() => onBuy(item)}
+        >
+          <Text style={style.buyButtonText}>
+            {t('rewards_buy_button')}
+          </Text>
+        </TouchableOpacity>
+      )}
+      {/* --- FIM DA LÓGICA DOS BOTÕES --- */}
+
     </View>
   );
 };
@@ -85,12 +110,18 @@ const RewardsScreen = () => {
   const { t } = useTranslation();
   const style = styles(theme);
 
-  // 3. Pegar os dados e funções do Contexto
-  const { xp, unlockedItems, unlockItem } = useUser();
+  // Pegar TODAS as funções e estados necessários do Contexto
+  const { 
+    xp, 
+    unlockedItems, 
+    unlockItem, 
+    equipItem, 
+    unequipItem, 
+    isEquipped 
+  } = useUser();
 
-  // 4. Lógica de Compra
+  // Função de Compra
   const handleBuyItem = (item) => {
-    // Tenta comprar o item
     const success = unlockItem(item.id, item.cost);
 
     if (success) {
@@ -98,6 +129,8 @@ const RewardsScreen = () => {
         t('rewards_buy_success_title'), 
         t('rewards_buy_success_message', { item: t(item.titleKey) })
       );
+      // Equipa automaticamente ao comprar
+      equipItem(item.id);
     } else {
       Alert.alert(
         t('rewards_buy_fail_title'),
@@ -107,37 +140,40 @@ const RewardsScreen = () => {
   };
 
   return (
-    <View style={style.container}>
+    <SafeAreaView style={style.container}>
       <FlatList
         data={REWARDS_LIST}
         keyExtractor={(item) => item.id}
-        // 5. Renderiza o Header com o XP
         ListHeaderComponent={<StoreHeader xp={xp} theme={theme} t={t} />}
-        // 6. Renderiza cada item
+        // Passar as novas props para o 'renderItem'
         renderItem={({ item }) => (
           <RewardItem
             item={item}
             xp={xp}
             onBuy={handleBuyItem}
             isOwned={unlockedItems.includes(item.id)}
+            isEquipped={isEquipped(item.id)} // <--- NOVO
+            onEquip={equipItem}               // <--- NOVO
+            onUnequip={unequipItem}             // <--- NOVO
             theme={theme}
             t={t}
           />
         )}
         contentContainerStyle={style.listContainer}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
-// 7. Estilos
+// Estilos
 const styles = (theme) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.background,
   },
   listContainer: {
-    paddingBottom: 40,
+    // Espaço no fundo para o Poti não tapar o último item
+    paddingBottom: 140, 
   },
   // Header
   headerContainer: {
@@ -194,13 +230,13 @@ const styles = (theme) => StyleSheet.create({
     fontWeight: '500',
   },
   buyButton: {
-    backgroundColor: theme.primary,
+    backgroundColor: theme.primary, // Botão "Equipar" ou "Comprar"
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 8,
   },
   buyButtonOwned: {
-    backgroundColor: theme.subtleText,
+    backgroundColor: theme.subtleText, // Cinza para "Remover"
   },
   buyButtonDisabled: {
     backgroundColor: theme.card,

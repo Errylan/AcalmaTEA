@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, Animated, Image } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-// --- MUDANÇA: Importar o useUser ---
 import { useUser } from '../context/UserDataContext';
 
 const screenToTextKey = {
@@ -15,25 +14,25 @@ const screenToTextKey = {
   'ChallengeList': 'poti_ChallengeList',
   'ChallengeDetail': 'poti_ChallengeDetail',
   'Regulation': 'poti_Regulation',
-  'Settings': 'poti_Settings',
-  // --- MUDANÇA: Adicionar as novas telas ---
+  'HomeTab': 'poti_Home',
+  'MoodDiaryTab': 'poti_MoodDiary',
+  'RewardsTab': 'poti_Rewards',
+  'SettingsTab': 'poti_Settings',
   'MoodDiary': 'poti_MoodDiary',
   'Rewards': 'poti_Rewards',
-  // --- FIM DA MUDANÇA ---
+  'Settings': 'poti_Settings',
 };
 
 const specialPositionScreens = [ 
   // 'ChallengeDetail' 
 ];
 
-// --- Lista de Cores (Chave do item e o valor da cor) ---
 const COLOR_TINTS = {
-  'cor_vermelha': '#FF6347', // Tomato
-  'cor_verde': '#90EE90',   // LightGreen
-  'cor_roxa': '#BA55D3',    // MediumOrchid
+  'cor_vermelha': '#FF6347',
+  'cor_verde': '#90EE90',
+  'cor_roxa': '#BA55D3',
 };
 
-// --- Lista de Acessórios (Chave do item e o Emoji) ---
 const ACCESSORY_EMOJIS = {
   'oculos_sol': '🕶️',
   'laco': '🎀',
@@ -45,8 +44,8 @@ const ACCESSORY_EMOJIS = {
   'cartola': '🎩',
   'chapeu_detetive': '🕵️',
   'aureola': '😇',
-  'cor_arcoiris': '🌈', // Cor especial tratada como emoji
-  'cor_dourada': '✨', // Cor especial tratada como emoji
+  'cor_arcoiris': '🌈', 
+  'cor_dourada': '✨', 
 };
 
 const PotiAssistant = ({ activeScreen }) => {
@@ -55,20 +54,16 @@ const PotiAssistant = ({ activeScreen }) => {
   const popAnim = useRef(new Animated.Value(0)).current;
   const insets = useSafeAreaInsets();
   
-  // --- MUDANÇA: Pegar os itens do usuário ---
-  const { unlockedItems } = useUser();
+ // 1. Obter 'equippedItems' em vez de 'unlockedItems'
+  const { equippedItems } = useUser();
   const style = styles(theme);
 
-  // --- MUDANÇA: Lógica para encontrar o item de Cor ---
-  // Encontra a *última* cor comprada para aplicar o tint
-  const activeColorKey = [...unlockedItems].reverse().find(item => COLOR_TINTS[item]);
+  const activeColorKey = equippedItems.color; 
   const activeColorTint = activeColorKey ? COLOR_TINTS[activeColorKey] : null;
 
-  // --- MUDANÇA: Lógica para encontrar o Acessório (não-cor) ---
-  // Encontra o *último* acessório comprado para exibir
-  const activeAccessoryKey = [...unlockedItems].reverse().find(item => ACCESSORY_EMOJIS[item]);
+
+  const activeAccessoryKey = equippedItems.accessory;
   const activeAccessoryEmoji = activeAccessoryKey ? ACCESSORY_EMOJIS[activeAccessoryKey] : null;
-  // --- FIM DA MUDANÇA ---
 
   useEffect(() => {
     popAnim.setValue(0); 
@@ -80,11 +75,19 @@ const PotiAssistant = ({ activeScreen }) => {
     }).start();
   }, [popAnim, activeScreen]); 
 
-  // --- MUDANÇA: Adicionado 'poti_default' como fallback ---
-  const textKey = screenToTextKey[activeScreen] || 'poti_default';
-  // --- FIM DA MUDANÇA ---
+  const textKey = screenToTextKey[activeScreen] || 'poti_Home'; 
 
   const useSpecialPosition = specialPositionScreens.includes(activeScreen);
+
+  // --- MUDANÇA: LÓGICA DA POSIÇÃO DO POTI ---
+  // 1. Verifica se a tela atual é uma das que está nas ABAS
+  const isTabScreen = ['HomeTab', 'MoodDiaryTab', 'RewardsTab', 'SettingsTab'].includes(activeScreen);
+
+  // 2. Define o espaçamento de baixo
+  // Se for uma tela de aba, sobe 80 (60 da aba + 20 de margem)
+  // Se for uma tela normal (ex: Expressions), sobe 20 (para ficar acima da barra de gestos)
+  const bottomPadding = insets.bottom + (isTabScreen ? 80 : 20);
+  // --- FIM DA MUDANÇA ---
 
   const containerStyle = [
     style.container, 
@@ -92,7 +95,8 @@ const PotiAssistant = ({ activeScreen }) => {
       ? style.containerTopRight
       : [
           style.containerBottomLeft, 
-          { bottom: insets.bottom + 20 }
+          // 3. Aplica o espaçamento calculado
+          { bottom: bottomPadding }
         ],
     { 
       opacity: popAnim, 
@@ -102,26 +106,19 @@ const PotiAssistant = ({ activeScreen }) => {
 
   return (
     <Animated.View style={containerStyle}>
-      {/* 1. Container para o Poti e seus acessórios */}
       <View style={style.potiImageContainer}> 
-        
-        {/* 2. Imagem Base (O Poti) */}
         <Image 
           source={require('../assets/poti-avatar.png')} 
           style={[
             style.characterImage,
-            // Aplica a cor (tintColor) se uma for encontrada
             activeColorTint ? { tintColor: activeColorTint } : {}
           ]} 
         />
-        
-        {/* 3. Camada de Acessório (Emoji) */}
         {activeAccessoryEmoji && (
           <Text style={style.accessoryEmoji}>{activeAccessoryEmoji}</Text>
         )}
       </View>
       
-      {/* 4. O Balão de Fala */}
       <View style={style.bubble}>
         <Text style={style.bubbleText}>{t(textKey)}</Text>
       </View>
@@ -144,7 +141,6 @@ const styles = (theme) => StyleSheet.create({
     top: 20,
     right: 20,
   },
-  // --- MUDANÇA: Estilos para Acessórios ---
   potiImageContainer: {
     width: 80, 
     height: 80, 
@@ -157,15 +153,10 @@ const styles = (theme) => StyleSheet.create({
     resizeMode: 'contain',
   },
   accessoryEmoji: {
-    fontSize: 50, // Tamanho do Emoji (ajuste conforme necessário)
+    fontSize: 50,
     position: 'absolute',
-    // O posicionamento "centralizado" funciona bem para a maioria
     textAlign: 'center',
-    // Ajustes finos (descomente e ajuste se o emoji ficar torto)
-    // top: -10, 
-    // left: 5,
   },
-  // --- FIM DA MUDANÇA ---
   bubble: {
     backgroundColor: theme.card,
     padding: 12,

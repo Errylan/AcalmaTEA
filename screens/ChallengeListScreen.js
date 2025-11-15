@@ -1,17 +1,18 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+// 1. Importar SafeAreaView e remover View
+import { Text, StyleSheet, TouchableOpacity, FlatList, } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { mockChallenges } from '../constants/data';
-import { useUser } from '../context/UserDataContext'; 
+import { useUser } from '../context/UserDataContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-// --- MUDANÇA: Mapeamento de Status para Emoji ---
+
 const STATUS_EMOJI = {
   'easy': '😊',
   'medium': '😐',
   'hard': '😟',
 };
-// --- FIM DA MUDANÇA ---
 
 const ChallengeListScreen = ({ route, navigation }) => {
   const { theme } = useTheme();
@@ -19,9 +20,7 @@ const ChallengeListScreen = ({ route, navigation }) => {
   const style = styles(theme);
   const { categoryKey } = route.params;
   
-  // --- MUDANÇA: Pegar getChallengeCompletion ---
   const { isFavorite, getChallengeCompletion } = useUser();
-  // --- FIM DA MUDANÇA ---
 
   const challenges = useMemo(() => {
     if (categoryKey === 'favorites') {
@@ -41,9 +40,7 @@ const ChallengeListScreen = ({ route, navigation }) => {
   );
 
   const renderItem = ({ item }) => {
-    // --- MUDANÇA: Verificar status de conclusão ---
     const completionStatus = getChallengeCompletion(item.titleKey);
-    // --- FIM DA MUDANÇA ---
 
     return (
       <TouchableOpacity 
@@ -52,19 +49,18 @@ const ChallengeListScreen = ({ route, navigation }) => {
       >
         <Text style={style.menuText}>{item.titleKey ? t(item.titleKey) : item.title}</Text>
         
-        {/* --- MUDANÇA: Mostrar Emoji ou Seta --- */}
         {completionStatus ? (
           <Text style={style.emojiText}>{STATUS_EMOJI[completionStatus] || '✅'}</Text>
         ) : (
           <Text style={style.menuArrow}>❯</Text>
         )}
-        {/* --- FIM DA MUDANÇA --- */}
       </TouchableOpacity>
     );
   };
 
   return (
-    <View style={style.container}>
+    // 2. Substituir <View> por <SafeAreaView>
+    <SafeAreaView style={style.container}>
       <FlatList
         data={challenges}
         renderItem={renderItem}
@@ -72,19 +68,20 @@ const ChallengeListScreen = ({ route, navigation }) => {
         contentContainerStyle={style.list}
         ListEmptyComponent={<EmptyList />} 
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
 
 const styles = (theme) => StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 1, // <--- Esta linha é importante
     backgroundColor: theme.background,
   },
   list: {
     padding: 10,
     minHeight: '100%', 
+    paddingBottom: 140, 
   },
   emptyText: {
     fontSize: 14,
@@ -108,18 +105,16 @@ const styles = (theme) => StyleSheet.create({
     fontSize: 16,
     color: theme.text,
     fontWeight: '500',
-    flex: 1, // --- MUDANÇA: Para o texto não empurrar o emoji ---
+    flex: 1, 
   },
   menuArrow: {
     fontSize: 16,
     color: theme.primary,
   },
-  // --- MUDANÇA: Estilo do Emoji ---
   emojiText: {
     fontSize: 20,
     marginLeft: 10,
   },
-  // --- FIM DA MUDANÇA ---
 });
 
 export default ChallengeListScreen;

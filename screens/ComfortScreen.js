@@ -1,8 +1,10 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+// 1. IMPORTAR O 'SafeAreaView' E O 'ScrollView'
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { mockMotivation, mockBible } from '../constants/data';
+import{ SafeAreaView } from 'react-native-safe-area-context';
 
 const { height } = Dimensions.get('window');
 
@@ -42,7 +44,8 @@ const ComfortScreen = () => {
   const currentLanguage = i18n.language;
 
   return (
-    <View style={style.container}>
+    // 2. USAR O 'SafeAreaView' COMO CONTAINER PRINCIPAL
+    <SafeAreaView style={style.container}>
       <View style={style.tabContainer}>
         <TouchableOpacity
           style={[style.tab, tab === 'motivation' && style.tabActive]}
@@ -60,30 +63,35 @@ const ComfortScreen = () => {
         </TouchableOpacity>
       </View>
 
+      {/* Este View faz o cartão crescer e empurrar o botão para baixo */}
       <View style={style.contentContainer}>
         <View style={[style.card, { backgroundColor: theme.accent }]}>
-          <Text key={currentLanguage + currentItem} style={style.cardText}>
-            {t(currentItem)}
-          </Text>
+          {/* 3. ADICIONAR O 'ScrollView' AQUI DENTRO DO CARTÃO */}
+          <ScrollView contentContainerStyle={style.cardScrollView}>
+            <Text key={currentLanguage + currentItem} style={style.cardText}>
+              {t(currentItem)}
+            </Text>
+          </ScrollView>
         </View>
       </View>
 
       <TouchableOpacity style={style.nextButton} onPress={showNext}>
-        {/* ALTERADO: Seta agora aponta para a esquerda */}
-        <Text style={style.nextButtonText}>❮ {t('next')}</Text>
+        {/* Seta corrigida */}
+        <Text style={style.nextButtonText}>{t('next')} ❯</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 };
 
+// 4. ESTILOS ATUALIZADOS
 const styles = (theme) => StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 1, // <--- Essencial
     backgroundColor: theme.background,
-    justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 120, 
+    // Reduzido para dar espaço ao Poti na parte de baixo
+    paddingBottom: 20, 
   },
   tabContainer: {
     flexDirection: 'row',
@@ -108,21 +116,28 @@ const styles = (theme) => StyleSheet.create({
     color: '#FFFFFF',
   },
   contentContainer: {
+    flex: 1, // <--- Faz este container crescer e ocupar o espaço
     justifyContent: 'center',
     alignItems: 'center',
+    marginVertical: 20, 
   },
   card: {
     width: '100%',
-    minHeight: height * 0.4,
+    // O cartão vai crescer, mas limitamos a altura máxima
+    maxHeight: height * 0.5, 
     borderRadius: 20,
-    padding: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    // O padding foi movido para o ScrollView
+  },
+  // NOVO: Estilo para o ScrollView de dentro do cartão
+  cardScrollView: {
+    flexGrow: 1, // Garante que o scroll preenche
+    padding: 25, // O padding do cartão está aqui
+    justifyContent: 'center', // Centraliza textos curtos
   },
   cardText: {
     fontSize: 22,
@@ -132,12 +147,13 @@ const styles = (theme) => StyleSheet.create({
     fontWeight: '500',
   },
   nextButton: {
-    // ALTERADO: de 'flex-end' para 'flex-start'
-    alignSelf: 'flex-start',
+    alignSelf: 'flex-end', // <--- Manda o botão para a DIREITA
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 20,
     backgroundColor: theme.card,
+    // Esta margem "sobe" o botão, deixando espaço para o Poti
+    marginBottom: 90, 
   },
   nextButtonText: {
     color: theme.primary,

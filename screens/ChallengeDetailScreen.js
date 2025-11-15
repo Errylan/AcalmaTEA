@@ -1,12 +1,14 @@
-// --- MUDANÇA: Importar Modal ---
 import React, { useLayoutEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Alert } from 'react-native';
-// --- FIM DA MUDANÇA ---
+// 1. Importar SafeAreaView
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Alert,  } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { useUser } from '../context/UserDataContext'; 
 import { useNavigation } from '@react-navigation/native'; 
+import { SafeAreaView } from 'react-native-safe-area-context';
 
+
+// ... (Componente HeaderFavoriteButton não muda) ...
 const HeaderFavoriteButton = ({ challengeId, theme }) => {
   const { isFavorite, toggleFavorite } = useUser();
   const favorite = isFavorite(challengeId);
@@ -21,23 +23,19 @@ const HeaderFavoriteButton = ({ challengeId, theme }) => {
 };
 
 const ChallengeDetailScreen = ({ route }) => {
+  // ... (Toda a lógica interna não muda) ...
   const { theme } = useTheme();
   const { t, i18n } = useTranslation();
   const style = styles(theme);
   const { challenge } = route.params;
   const navigation = useNavigation();
   
-  // --- MUDANÇA: Pegar novas funções do Contexto ---
   const { addXp, markChallengeCompleted, getChallengeCompletion } = useUser();
   const challengeId = challenge.titleKey; 
   
-  // Verifica o status de conclusão (retorna 'easy', 'medium', 'hard' ou null)
   const completionStatus = getChallengeCompletion(challengeId);
   
-  // Estado para o novo Modal
   const [modalVisible, setModalVisible] = useState(false);
-  // --- FIM DA MUDANÇA ---
-
 
   const langKey = i18n.language; 
   const title = challenge.titleKey ? t(challenge.titleKey) : challenge.title;
@@ -53,134 +51,122 @@ const ChallengeDetailScreen = ({ route }) => {
     });
   }, [navigation, challengeId, theme]);
 
-  // --- MUDANÇA: Função de completar desafio agora abre o Modal ---
   const handleCompleteChallenge = () => {
     setModalVisible(true);
   };
   
-  // --- MUDANÇA: Nova função para quando o usuário escolhe a dificuldade ---
   const handleSelectDifficulty = (difficulty) => {
-    const xpGained = 10; // Você pode mudar o XP ganho se quiser
+    const xpGained = 10; 
     
-    // 1. Salva a dificuldade e o XP
     markChallengeCompleted(challengeId, difficulty);
     addXp(xpGained);
     
-    // 2. Fecha o modal
     setModalVisible(false);
     
-    // 3. Mostra o alerta de sucesso (que já tínhamos)
     Alert.alert(
       t('challenge_complete_title'), 
       t('challenge_complete_message', { xp: xpGained })
     );
   };
-  // --- FIM DA MUDANÇA ---
 
   return (
-    <ScrollView 
-      style={style.container} 
-      key={langKey + title}
-      contentContainerStyle={{ paddingBottom: 140 }} 
-    >
-      <View style={[style.card, { backgroundColor: theme.accent }]}>
-        {/* ... (Conteúdo do desafio, sem alteração) ... */}
-        <Text style={style.title}>{t('challenge_title')}</Text>
-        <Text style={style.subtitle}>{title}</Text>
-        <View style={style.divider} />
-        <Text style={style.label}>{t('objective')}:</Text>
-        <Text style={style.text}>{objective}</Text>
-        <View style={style.divider} />
-        <Text style={style.label}>{t('instructions')}:</Text>
-        {steps.map((step, index) => (
-          <Text key={index} style={style.stepText}>
-            <Text style={{fontWeight: 'bold'}}>{t('challenge_step', { num: index + 1 })}</Text>
-            {step}
-          </Text>
-        ))}
-        {extra && (
-          <>
-            <View style={style.divider} />
-            <Text style={style.label}>{t('extra_tip')}:</Text>
-            <Text style={style.text}>{extra}</Text>
-          </>
-        )}
-      </View>
-
-      {/* --- MUDANÇA: Lógica do Botão/Mensagem de Conclusão --- */}
-      <View style={style.completionContainer}>
-        {!completionStatus ? (
-          // Se NÃO foi completo (status é null), mostra o botão
-          <TouchableOpacity 
-            style={style.completeButton} 
-            onPress={handleCompleteChallenge}
-          >
-            <Text style={style.completeButtonText}>{t('challenge_complete_button')}</Text>
-          </TouchableOpacity>
-        ) : (
-          // Se JÁ foi completo, mostra a mensagem
-          <Text style={style.completedText}>{t('challenge_completed_text')} ✅</Text>
-        )}
-      </View>
-      
-      {/* --- MUDANÇA: O Modal de Feedback --- */}
-      <Modal
-        transparent={true}
-        animationType="fade"
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+    // 2. Substituir o ScrollView principal por SafeAreaView
+    <SafeAreaView style={style.container}>
+      <ScrollView 
+        contentContainerStyle={{ padding: 20, paddingBottom: 140 }} // Adicionei padding aqui
       >
-        <View style={style.modalOverlay}>
-          <View style={style.modalContainer}>
-            <Text style={style.modalTitle}>{t('challenge_feedback_title')}</Text>
-            
-            <TouchableOpacity 
-              style={style.feedbackButton}
-              onPress={() => handleSelectDifficulty('easy')}
-            >
-              <Text style={style.feedbackButtonText}>😊 {t('challenge_feedback_easy')}</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={style.feedbackButton}
-              onPress={() => handleSelectDifficulty('medium')}
-            >
-              <Text style={style.feedbackButtonText}>😐 {t('challenge_feedback_medium')}</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={style.feedbackButton}
-              onPress={() => handleSelectDifficulty('hard')}
-            >
-              <Text style={style.feedbackButtonText}>😟 {t('challenge_feedback_hard')}</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={style.cancelButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={style.cancelButtonText}>{t('challenge_feedback_cancel')}</Text>
-            </TouchableOpacity>
-          </View>
+        <View style={[style.card, { backgroundColor: theme.accent }]}>
+          <Text style={style.title}>{t('challenge_title')}</Text>
+          <Text style={style.subtitle}>{title}</Text>
+          <View style={style.divider} />
+          <Text style={style.label}>{t('objective')}:</Text>
+          <Text style={style.text}>{objective}</Text>
+          <View style={style.divider} />
+          <Text style={style.label}>{t('instructions')}:</Text>
+          {steps.map((step, index) => (
+            <Text key={index} style={style.stepText}>
+              <Text style={{fontWeight: 'bold'}}>{t('challenge_step', { num: index + 1 })}</Text>
+              {step}
+            </Text>
+          ))}
+          {extra && (
+            <>
+              <View style={style.divider} />
+              <Text style={style.label}>{t('extra_tip')}:</Text>
+              <Text style={style.text}>{extra}</Text>
+            </>
+          )}
         </View>
-      </Modal>
-      {/* --- FIM DA MUDANÇA --- */}
 
-    </ScrollView>
+        <View style={style.completionContainer}>
+          {!completionStatus ? (
+            <TouchableOpacity 
+              style={style.completeButton} 
+              onPress={handleCompleteChallenge}
+            >
+              <Text style={style.completeButtonText}>{t('challenge_complete_button')}</Text>
+            </TouchableOpacity>
+          ) : (
+            <Text style={style.completedText}>{t('challenge_completed_text')} ✅</Text>
+          )}
+        </View>
+        
+        <Modal
+          transparent={true}
+          animationType="fade"
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={style.modalOverlay}>
+            <View style={style.modalContainer}>
+              <Text style={style.modalTitle}>{t('challenge_feedback_title')}</Text>
+              
+              <TouchableOpacity 
+                style={style.feedbackButton}
+                onPress={() => handleSelectDifficulty('easy')}
+              >
+                <Text style={style.feedbackButtonText}>😊 {t('challenge_feedback_easy')}</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={style.feedbackButton}
+                onPress={() => handleSelectDifficulty('medium')}
+              >
+                <Text style={style.feedbackButtonText}>😐 {t('challenge_feedback_medium')}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={style.feedbackButton}
+                onPress={() => handleSelectDifficulty('hard')}
+              >
+                <Text style={style.feedbackButtonText}>😟 {t('challenge_feedback_hard')}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={style.cancelButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={style.cancelButtonText}>{t('challenge_feedback_cancel')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = (theme) => StyleSheet.create({
-  // ... (Estilos do card, título, etc. - Sem alteração)
   container: {
-    flex: 1,
+    flex: 1, // <--- Esta linha é importante
     backgroundColor: theme.background,
-    padding: 20,
+    // Removido o padding, pois foi para o contentContainer do ScrollView
   },
   card: {
     borderRadius: 20,
     padding: 25,
   },
+  // ... (restante dos estilos não muda)
   title: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -243,11 +229,9 @@ const styles = (theme) => StyleSheet.create({
     color: theme.primary,
     padding: 15,
   },
-  
-  // --- MUDANÇA: NOVOS ESTILOS PARA O MODAL ---
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)', // Fundo escuro
+    backgroundColor: 'rgba(0, 0, 0, 0.6)', 
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -288,7 +272,6 @@ const styles = (theme) => StyleSheet.create({
     color: theme.subtleText,
     fontWeight: '500',
   },
-  // --- FIM DA MUDANÇA ---
 });
 
 export default ChallengeDetailScreen;

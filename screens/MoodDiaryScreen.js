@@ -169,6 +169,7 @@ const styles = (theme) => StyleSheet.create({
     color: theme.text,
     marginTop: 20,
     alignSelf: 'flex-start',
+    
   },
   emptyText: {
     fontSize: 14,

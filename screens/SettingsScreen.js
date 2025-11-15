@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Switch, TouchableOpacity } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const SettingsScreen = () => {
   const { theme, isDarkMode, toggleTheme } = useTheme();
@@ -13,7 +14,7 @@ const SettingsScreen = () => {
   };
 
   return (
-    <View style={style.container}>
+    <SafeAreaView style={style.container}>
       {/* Configuração de Tema */}
       <View style={style.settingRow}>
         <Text style={style.settingText}>{t('dark_mode')}</Text>
@@ -48,7 +49,7 @@ const SettingsScreen = () => {
         {/* --- FIM DO BOTÃO NOVO --- */}
         
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 

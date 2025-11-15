@@ -1,14 +1,16 @@
 // screens/HomeScreen.js
-import React, { useState, useMemo } from 'react'; // 1. Importar useState e useMemo
+import React, { useState, useMemo } from 'react';
 import {
-  View,
   Text,
   StyleSheet,
   Image,
   TouchableOpacity,
   ScrollView,
-  TextInput, // 2. Importar TextInput
+  TextInput,
+  View
 } from 'react-native';
+// 1. Importar o SafeAreaView
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 
@@ -17,36 +19,31 @@ const HomeScreen = ({ navigation }) => {
   const { t } = useTranslation();
   const style = styles(theme);
 
-  // 3. Adicionar estado para a busca
   const [searchQuery, setSearchQuery] = useState('');
 
-  // 4. Lista original de itens (agora com useMemo para otimização)
   const menuItems = useMemo(() => [
     { title: t('expressions'), screen: 'Expressions' },
     { title: t('find_comfort'), screen: 'Comfort' },
     { title: t('social_skills'), screen: 'SocialSkills' },
     { title: t('regulations'), screen: 'Regulation' },
-    // Você poderia adicionar mais itens "buscáveis" aqui se quisesse
-    // ex: { title: t('settings_searchable'), screen: 'Settings' }
-  ], [t]); // Depende da tradução
+  ], [t]); 
 
-  // 5. Lista filtrada com base na busca
   const filteredMenuItems = useMemo(() => {
     const lowerQuery = searchQuery.toLowerCase();
     if (!lowerQuery) {
-      return menuItems; // Retorna tudo se a busca estiver vazia
+      return menuItems;
     }
-    // Filtra os itens se o título incluir o texto da busca
     return menuItems.filter(item =>
       item.title.toLowerCase().includes(lowerQuery)
     );
   }, [searchQuery, menuItems]);
 
   return (
-    <View style={style.container}>
+    // 2. Substituir <View> por <SafeAreaView>
+    <SafeAreaView style={style.container}>
       <ScrollView 
         contentContainerStyle={style.scrollContent}
-        keyboardShouldPersistTaps="handled" // Ajuda a fechar o teclado
+        keyboardShouldPersistTaps="handled" 
       >
         <View style={style.header}>
           <Image source={require('../assets/logo.png')} style={style.logo} />
@@ -54,23 +51,21 @@ const HomeScreen = ({ navigation }) => {
           <Text style={style.subtitle}>{t('main_menu')}</Text>
         </View>
 
-        {/* 6. Adicionar o TextInput (Barra de Busca) */}
         <TextInput
           style={style.searchBar}
-          placeholder={t('home_search_placeholder')} // Nova chave de tradução
+          placeholder={t('home_search_placeholder')}
           placeholderTextColor={theme.subtleText}
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
 
         <View style={style.menuContainer}>
-          {/* 7. Mapear a lista FILTRADA */}
           {filteredMenuItems.map((item) => (
             <TouchableOpacity
               key={item.screen}
               style={style.menuItem}
               onPress={() => {
-                setSearchQuery(''); // Limpa a busca ao navegar
+                setSearchQuery(''); 
                 navigation.navigate(item.screen)
               }}
             >
@@ -79,7 +74,6 @@ const HomeScreen = ({ navigation }) => {
             </TouchableOpacity>
           ))}
           
-          {/* Adicionar mensagem se nada for encontrado */}
           {filteredMenuItems.length === 0 && (
             <Text style={style.noResultsText}>
               {t('home_search_no_results', { query: searchQuery })}
@@ -87,14 +81,13 @@ const HomeScreen = ({ navigation }) => {
           )}
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
-// 8. Adicionar novos estilos
 const styles = (theme) => StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 1, // <--- Esta linha é importante
     backgroundColor: theme.background,
   },
   scrollContent: {
@@ -104,7 +97,7 @@ const styles = (theme) => StyleSheet.create({
   },
   header: {
     alignItems: 'center',
-    marginBottom: 20, // Reduzido para dar espaço à busca
+    marginBottom: 20,
   },
   logo: {
     width: 150,
@@ -124,7 +117,6 @@ const styles = (theme) => StyleSheet.create({
     color: theme.subtleText,
     marginTop: 8,
   },
-  // NOVO ESTILO: Barra de Busca
   searchBar: {
     width: '100%',
     backgroundColor: theme.card,
@@ -163,7 +155,6 @@ const styles = (theme) => StyleSheet.create({
     fontSize: 16,
     color: theme.primary,
   },
-  // NOVO ESTILO: Texto "Nenhum resultado"
   noResultsText: {
     color: theme.subtleText,
     textAlign: 'center',

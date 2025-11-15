@@ -1,8 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+// 1. Importar SafeAreaView e remover View
+import { Text, StyleSheet, TouchableOpacity, FlatList, } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { mockChallenges } from '../constants/data';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const SocialSkillsMenuScreen = ({ navigation }) => {
   const { theme } = useTheme();
@@ -17,24 +19,19 @@ const SocialSkillsMenuScreen = ({ navigation }) => {
     conflict: 'social_conflict',
   };
 
-  // Pega as categorias normais
   const categories = Object.keys(mockChallenges || {}).map(key => ({
     key: key,
     title: t(categoryKeyMap[key] || key), 
   }));
 
-  // --- MUDANÇA: Adicionar "Favoritos" no topo da lista ---
   categories.unshift({
-    key: 'favorites', // Chave especial
-    title: t('social_favorites'), // Nova chave de tradução
+    key: 'favorites', 
+    title: t('social_favorites'),
   });
-  // --- FIM DA MUDANÇA ---
 
   const renderItem = ({ item }) => (
     <TouchableOpacity 
       style={style.menuItem}
-      // Navega para a ChallengeList, passando a chave da categoria
-      // (que agora pode ser 'favorites')
       onPress={() => navigation.navigate('ChallengeList', { 
         categoryKey: item.key, 
         title: item.title 
@@ -46,20 +43,21 @@ const SocialSkillsMenuScreen = ({ navigation }) => {
   );
 
   return (
-    <View style={style.container}>
+    // 2. Substituir <View> por <SafeAreaView>
+    <SafeAreaView style={style.container}>
       <FlatList
         data={categories}
         renderItem={renderItem}
         keyExtractor={(item) => item.key}
         contentContainerStyle={style.list}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = (theme) => StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 1, // <--- Esta linha é importante
     backgroundColor: theme.background,
   },
   list: {

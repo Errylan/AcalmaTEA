@@ -1,40 +1,32 @@
 // screens/ExpressionsScreen.js
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, FlatList, TextInput } from 'react-native';
+// 1. Importar SafeAreaView e remover View
+import { Text, StyleSheet, FlatList, TextInput,View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { mockExpressions } from '../constants/data';
 
 const ExpressionsScreen = () => {
   const { theme } = useTheme();
-  const { t, i18n } = useTranslation(); // Pegar o i18n para saber o idioma
+  const { t, i18n } = useTranslation(); 
   const style = styles(theme);
   const [search, setSearch] = useState('');
 
-  React.useEffect(() => {
-    console.log('ExpressionsScreen montado');
-    console.log('mockExpressions disponível:', !!mockExpressions);
-    console.log('Total de expressões inicial:', mockExpressions?.length);
-  }, []);
-
   const filteredData = useMemo(() => {
-    console.log('Total de expressões:', mockExpressions?.length);
     if (!search) return mockExpressions;
     const lowerSearch = search.toLowerCase();
     
-    // Filtrar com base no texto traduzido
     const filtered = mockExpressions.filter(
       (item) =>
         t(item.termKey).toLowerCase().includes(lowerSearch) ||
         t(item.meaningKey).toLowerCase().includes(lowerSearch)
     );
-    console.log('Expressões filtradas:', filtered.length);
     return filtered;
-  }, [search, i18n.language, t]); // Adicionar i18n.language e t como dependências
+  }, [search, i18n.language, t]); 
 
   const renderItem = ({ item }) => (
     <View style={style.card}>
-      {/* Usar t() para traduzir as chaves */}
       <Text style={style.term}>{t(item.termKey)}</Text>
       <Text style={style.meaning}><Text style={style.label}>{t('expressions_meaning')}</Text>{t(item.meaningKey)}</Text>
       <Text style={style.example}><Text style={style.label}>{t('expressions_example')}</Text>{t(item.exampleKey)}</Text>
@@ -42,8 +34,7 @@ const ExpressionsScreen = () => {
   );
 
   return (
-    <View style={style.container}>
-      
+    <SafeAreaView style={style.container}>
       <TextInput
         style={style.searchBar}
         placeholder={t('search_placeholder')}
@@ -54,17 +45,17 @@ const ExpressionsScreen = () => {
       <FlatList
         data={filteredData}
         renderItem={renderItem}
-        // Atualizar o keyExtractor para usar a chave do termo
         keyExtractor={(item) => item.termKey}
+        // A MUDANÇA ESTÁ AQUI
         contentContainerStyle={style.list}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = (theme) => StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 1, // <--- Esta linha é importante
     backgroundColor: theme.background,
   },
   searchBar: {
@@ -77,7 +68,7 @@ const styles = (theme) => StyleSheet.create({
   },
   list: {
     paddingHorizontal: 10,
-    paddingBottom: 10,
+    paddingBottom: 140,
   },
   card: {
     backgroundColor: theme.card,

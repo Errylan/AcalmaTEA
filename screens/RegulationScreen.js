@@ -1,18 +1,19 @@
-import React, { useState, useMemo } from 'react'; // --- MUDANÇA ---
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import React, { useState, useMemo } from 'react';
+// 1. Importar SafeAreaView e remover View
+import { Text, StyleSheet, FlatList, TouchableOpacity, View} from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { mockRegulations } from '../constants/data';
-import { useUser } from '../context/UserDataContext'; // --- MUDANÇA ---
+import { useUser } from '../context/UserDataContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-// --- MUDANÇA: AccordionItem agora recebe props do Contexto ---
 const AccordionItem = ({ item, theme }) => {
+  // ... (Código do AccordionItem não muda)
   const [expanded, setExpanded] = useState(false);
   const style = styles(theme);
   const { t, i18n } = useTranslation();
   const langKey = i18n.language; 
   
-  // Pegar funções do contexto
   const { isFavorite, toggleFavorite } = useUser();
   const favorite = isFavorite(item.titleKey);
 
@@ -25,7 +26,6 @@ const AccordionItem = ({ item, theme }) => {
   return (
     <View style={style.card} key={langKey + title}> 
       <View style={style.cardHeader}>
-        {/* Botão de Favorito (Estrela) */}
         <TouchableOpacity 
           onPress={() => toggleFavorite(item.titleKey)}
           style={style.starButton}
@@ -33,12 +33,10 @@ const AccordionItem = ({ item, theme }) => {
           <Text style={style.starText}>{favorite ? '★' : '☆'}</Text>
         </TouchableOpacity>
 
-        {/* Título (agora dentro de um Touchable) */}
         <TouchableOpacity onPress={() => setExpanded(!expanded)} style={style.titleContainer}>
           <Text style={style.cardTitle}>{title}</Text>
         </TouchableOpacity>
 
-        {/* Botão de Expandir (+) */}
         <TouchableOpacity onPress={() => setExpanded(!expanded)}>
           <Text style={style.cardToggle}>{expanded ? '−' : '+'}</Text>
         </TouchableOpacity>
@@ -58,30 +56,25 @@ const AccordionItem = ({ item, theme }) => {
     </View>
   );
 };
-// --- FIM DA MUDANÇA ---
 
 const RegulationScreen = () => {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const style = styles(theme);
   
-  // --- MUDANÇA: Pegar favoritos e criar lista ---
   const { favorites } = useUser();
   
   const favoriteItems = useMemo(() => {
-    // Filtra a lista completa de regulações
     return mockRegulations.filter(item => favorites.includes(item.titleKey));
-  }, [favorites]); // Recalcula apenas quando os favoritos mudam
-  // --- FIM DA MUDANÇA ---
-
-  // Componente para lista vazia
+  }, [favorites]);
+  
   const EmptyList = ({ textKey }) => (
     <Text style={style.emptyText}>{t(textKey)}</Text>
   );
 
   return (
-    <View style={style.container}>
-      {/* --- MUDANÇA: Duas FlatLists. Uma para Favoritos, outra para Todos --- */}
+    // 2. Substituir <View> por <SafeAreaView>
+    <SafeAreaView style={style.container}>
       <FlatList
         data={favoriteItems}
         renderItem={({ item }) => <AccordionItem item={item} theme={theme} />}
@@ -91,7 +84,6 @@ const RegulationScreen = () => {
           <Text style={style.listHeader}>{t('favorites_title')}</Text>
         }
         ListEmptyComponent={<EmptyList textKey="favorites_empty_reg" />}
-        // A "lista principal" agora é uma combinação
         ListFooterComponent={
           <FlatList
             data={mockRegulations}
@@ -104,20 +96,19 @@ const RegulationScreen = () => {
           />
         }
       />
-      {/* --- FIM DA MUDANÇA --- */}
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = (theme) => StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 1, // <--- Esta linha é importante
     backgroundColor: theme.background,
   },
   list: {
     padding: 10,
+    paddingBottom: 140,
   },
-  // --- MUDANÇA: Novos Estilos ---
   listHeader: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -133,7 +124,6 @@ const styles = (theme) => StyleSheet.create({
     padding: 20,
     fontStyle: 'italic',
   },
-  // --- FIM DA MUDANÇA ---
   card: {
     backgroundColor: theme.card,
     borderRadius: 10,
@@ -145,24 +135,21 @@ const styles = (theme) => StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  // --- MUDANÇA: Estilos do Botão de Estrela ---
   starButton: {
     paddingHorizontal: 10,
   },
   starText: {
     fontSize: 24,
-    color: theme.accent, // Cor Amarela
+    color: theme.accent, 
   },
   titleContainer: {
     flex: 1,
     marginHorizontal: 5,
   },
-  // --- FIM DA MUDANÇA ---
   cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: theme.primary,
-    flex: 1, // Removido para caber a estrela
   },
   cardToggle: {
     fontSize: 24,

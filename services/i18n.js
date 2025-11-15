@@ -1455,6 +1455,10 @@ const resources = {
       'onboarding_desc_9': 'I am Poti! I will ll appear on each screen to give tips on how to use the app.',
       'onboarding_title_10': 'Ready to Start?',
       'onboarding_desc_10': 'Your journey of self-care and growth begins now. We are with you!',
+      "tab_home": "Home",
+      "tab_diary": "Diary",
+      "tab_rewards": "Rewards",
+      "tab_settings": "Settings",
 
 
       'onboarding_finish': 'Finish',
@@ -1515,7 +1519,8 @@ const resources = {
       "mood_angry": "Angry",
       "poti_MoodDiary": "This is your Mood Diary. Tap an emoji to log how you're feeling right now!",
       "poti_Rewards": "Welcome to the Shop! You can use your XP here to unlock new styles for me.",
-
+      "rewards_equip_button": "Equip",
+      "rewards_unequip_button": "Unequip",
 
 
 
@@ -3033,6 +3038,12 @@ const resources = {
       "mood_angry": "Irritado",
       "poti_MoodDiary": "Este é o seu Diário de Humor. Toque em um emoji para registrar como você se sente agora!",
       "poti_Rewards": "Bem-vindo à Loja! Aqui você pode usar seu XP para desbloquear novos visuais para mim.",
+      "tab_home": "Início",
+      "tab_diary": "Diário",
+      "tab_rewards": "Recompensas",
+      "tab_settings": "Configurações",
+      "rewards_equip_button": "Equipar",
+      "rewards_unequip_button": "Remover",
 
 
 
@@ -4526,6 +4537,10 @@ const resources = {
       'onboarding_desc_9': '¡Soy Poti! Apareceré en cada pantalla para darte consejos sobre cómo usar la app.',
       'onboarding_title_10': '¿Listo para empezar?',
       'onboarding_desc_10': 'Tu camino de autocuidado y crecimiento comienza ahora. ¡Estamos contigo!',
+      "tab_home": "Inicio",
+      "tab_diary": "Diario",
+      "tab_rewards": "Regalos",
+      "tab_settings": "Configuraciónes",
       
 
       'onboarding_finish': 'Finalizar',
@@ -4586,6 +4601,8 @@ const resources = {
       "mood_angry": "Enojado",
       "poti_MoodDiary": "Este es tu Diario de Ánimo. ¡Toca un emoji para registrar cómo te sientes ahora!",
       "poti_Rewards": "¡Bienvenido a la Tienda! Aquí puedes usar tu XP para desbloquear nuevos estilos para mí.",
+      "rewards_equip_button": "Equipar",
+      "rewards_unequip_button": "Quitar",
 
     }
   },
