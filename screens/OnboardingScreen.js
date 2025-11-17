@@ -33,7 +33,7 @@ const slidesData = [
   },
   {
     id: '3',
-    image: require('../assets/confort.jpg'), 
+    image: require('../assets/comfort.jpg'), 
     titleKey: 'onboarding_title_3',
     descKey: 'onboarding_desc_3',
   },
