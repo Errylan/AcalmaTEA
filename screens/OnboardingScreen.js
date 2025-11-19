@@ -27,7 +27,7 @@ const slidesData = [
   },
   {
     id: '2',
-    image: require('../assets/expressions.jpg'), 
+    image: require('../assets/Expressions.jpg'), 
     titleKey: 'onboarding_title_2',
     descKey: 'onboarding_desc_2',
   },
@@ -75,7 +75,7 @@ const slidesData = [
     },
     {
     id: '10',
-    image: require('../assets/homescreen.jpg'), 
+    image: require('../assets/Homescreen.jpg'), 
     titleKey: 'onboarding_title_10',
     descKey: 'onboarding_desc_10',
     },
