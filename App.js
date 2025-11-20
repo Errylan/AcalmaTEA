@@ -10,7 +10,6 @@ import { UserDataProvider } from './context/UserDataContext';
 import { I18nextProvider, useTranslation } from 'react-i18next';
 import i18n from './services/i18n';
 import { StatusBar } from 'expo-status-bar';
-// REMOVIDO: import * as NavigationBar from 'expo-navigation-bar';
 
 import MainTabNavigator from './navigation/MainTabNavigator';
 
@@ -27,6 +26,8 @@ import PotiAssistant from './components/PotiAssistant';
 import 'react-native-gesture-handler';
 import SplashScreen from './screens/SplashScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
+// O AsyncStorage não é mais necessário para o onboarding nesta lógica, 
+// mas mantive o import caso use em outro lugar.
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Drawer = createDrawerNavigator();
@@ -54,9 +55,6 @@ const AppContent = () => {
   const { t } = useTranslation();
   const [routeName, setRouteName] = useState('Home');
   const navigationRef = useNavigationContainerRef();
-
-  // REMOVIDO: O useEffect que chamava 'NavigationBar' foi removido
-  // para acabar com o WARN.
 
   return (
     <View
@@ -86,14 +84,11 @@ const AppContent = () => {
             headerTintColor: '#FFFFFF',
           }}>
 
-          {/* 1. Tela "Home" aponta para o seu NAVEGADOR DE ABAS */}
           <Drawer.Screen
             name="Home"
             component={MainTabNavigator}
             options={{ title: t('app_title_home') }}
           />
-
-          {/* 2. ADICIONADAS DE VOLTA (como você pediu) */}
           <Drawer.Screen
             name="MoodDiary"
             component={MoodDiaryScreen}
@@ -110,7 +105,6 @@ const AppContent = () => {
             options={{ title: t('app_title_settings') }}
           />
 
-          {/* 3. O resto das telas */}
           <Drawer.Screen name="Expressions" component={ExpressionsScreen} options={{ title: t('app_title_expressions') }} />
           <Drawer.Screen name="Comfort" component={ComfortScreen} options={{ title: t('app_title_comfort') }} />
           <Drawer.Screen name="SocialSkills" component={SocialSkillsNavigator} options={{ title: t('app_title_social_nav') }} />
@@ -124,36 +118,28 @@ const AppContent = () => {
   );
 };
 
-// ... (Resto do componente App, SplashScreen, Onboarding, etc. não muda) ...
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
+  // MUDANÇA 1: Começa sempre como false. Não vamos carregar do disco.
   const [hasOnboarded, setHasOnboarded] = useState(false);
 
   useEffect(() => {
-    const checkOnboarding = async () => {
-      try {
-        const value = await AsyncStorage.getItem('hasOnboarded');
-        if (value !== null) {
-          setHasOnboarded(true);
-        }
-      } catch (e) {
-        console.log('Failed to load onboarding status.', e);
-      } finally {
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 2500);
-      }
+    // MUDANÇA 2: Removi a verificação do AsyncStorage.
+    // Apenas simulamos o tempo de carregamento do Splash Screen.
+    const initApp = async () => {
+      // Aqui você pode colocar outras lógicas de inicialização se precisar
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 2500);
     };
-    checkOnboarding();
+
+    initApp();
   }, []);
 
-  const handleOnboardingComplete = async () => {
-    try {
-      await AsyncStorage.setItem('hasOnboarded', 'true');
-      setHasOnboarded(true);
-    } catch (e) {
-      console.log('Failed to save onboarding status.', e);
-    }
+  const handleOnboardingComplete = () => {
+    // MUDANÇA 3: Removi o AsyncStorage.setItem.
+    // Apenas mudamos o estado na memória. Quando fechar o app, isso reseta.
+    setHasOnboarded(true);
   };
 
   return (
@@ -164,6 +150,7 @@ const App = () => {
             {isLoading ? (
               <SplashScreen />
             ) : !hasOnboarded ? (
+              // Como hasOnboarded é sempre false no início, isso sempre aparece
               <OnboardingScreen onComplete={handleOnboardingComplete} />
             ) : (
               <AppContent />

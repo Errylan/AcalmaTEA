@@ -1,19 +1,25 @@
-// screens/MoodDiaryScreen.js
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
   StyleSheet, 
   TouchableOpacity, 
   FlatList,
+  ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
-import { useUser } from '../context/UserDataContext'; // 1. Importar o hook useUser
+import { useUser } from '../context/UserDataContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNetInfo } from '@react-native-community/netinfo'; // Importar NetInfo
 
-// 2. Definir as emoções que o usuário pode registrar
-const MOOD_OPTIONS = [
+// --- CONFIGURAÇÃO DA API ---
+const API_URL = 'https://acalmatea-api.vercel.app/api/moods'; // <--- MUDE PARA O SEU URL REAL
+const CACHE_KEY = 'cached_mood_options';
+
+// Dados de Fábrica (Fallback para 1ª vez offline)
+const FACTORY_MOODS = [
   { key: 'happy', emoji: '😊', titleKey: 'mood_happy' },
   { key: 'calm', emoji: '😌', titleKey: 'mood_calm' },
   { key: 'anxious', emoji: '😬', titleKey: 'mood_anxious' },
@@ -23,74 +29,117 @@ const MOOD_OPTIONS = [
 
 const MoodDiaryScreen = () => {
   const { theme } = useTheme();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const style = styles(theme);
-
-  // 3. Pegar os dados e funções do Contexto
   const { moodLog, addMoodEntry } = useUser();
-  
-  // Estado para mostrar uma confirmação rápida
   const [confirmation, setConfirmation] = useState('');
+  
+  // Estados para os dados dinâmicos
+  const [moodOptions, setMoodOptions] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  const netInfo = useNetInfo();
+  const currentLang = i18n.language;
 
-  // 4. Função para registrar o humor
+  // --- LÓGICA OFFLINE-FIRST ---
+  useEffect(() => {
+    const loadMoods = async () => {
+      let dataToUse = [];
+      setIsLoading(true);
+
+      // 1. Tentar Cache Local
+      try {
+        const cached = await AsyncStorage.getItem(CACHE_KEY);
+        if (cached) {
+            dataToUse = JSON.parse(cached);
+        }
+      } catch (e) { console.error("Erro cache:", e); }
+
+      // 2. Se Cache vazio, usar Fábrica (traduzindo na hora)
+      if (!dataToUse.length) {
+          dataToUse = FACTORY_MOODS.map(m => ({
+              key: m.key,
+              emoji: m.emoji,
+              title: t(m.titleKey) 
+          }));
+      }
+
+      setMoodOptions(dataToUse);
+      setIsLoading(false);
+
+      // 3. Se Online, buscar atualização na API
+      if (netInfo.isConnected === false) return;
+
+      try {
+        const response = await fetch(`${API_URL}?lang=${currentLang}`);
+        const newData = await response.json();
+        
+        // Se houver mudança, atualizar estado e cache
+        if (JSON.stringify(newData) !== JSON.stringify(dataToUse)) {
+          setMoodOptions(newData);
+          await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(newData));
+        }
+      } catch (e) { 
+          console.log('Erro ao atualizar humores:', e); 
+      }
+    };
+    
+    loadMoods();
+  }, [currentLang, netInfo.isConnected]);
+
+  // --- FUNÇÕES DE INTERAÇÃO ---
   const handleAddMood = (mood) => {
-    addMoodEntry(mood.key); // Salva o 'happy', 'sad', etc.
-    
-    // Mostra uma mensagem de confirmação
-    setConfirmation(t('mood_log_saved', { mood: t(mood.titleKey) }));
-    
-    // Esconde a mensagem após 2 segundos
-    setTimeout(() => {
-      setConfirmation('');
-    }, 2000);
+    addMoodEntry(mood.key);
+    // Feedback visual
+    setConfirmation(t('mood_log_saved', { mood: mood.title }));
+    setTimeout(() => setConfirmation(''), 2000);
   };
 
-  // 5. Componente para renderizar cada item do histórico
   const renderItem = ({ item }) => {
-    // Encontra o emoji correspondente à emoção salva
-    const moodEmoji = MOOD_OPTIONS.find(m => m.key === item.emotion)?.emoji || '❔';
+    // Procura o emoji/título correspondente na lista dinâmica
+    const moodObj = moodOptions.find(m => m.key === item.emotion);
+    const moodEmoji = moodObj ? moodObj.emoji : '❔';
+    const moodTitle = moodObj ? moodObj.title : item.emotion;
     
-    // Formata o timestamp (ex: 10/11/2025, 19:30:15)
-    const date = new Date(item.timestamp).toLocaleString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    const date = new Date(item.timestamp).toLocaleString(currentLang === 'pt' ? 'pt-BR' : 'en-US', {
+      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
     });
 
     return (
       <View style={style.logItem}>
         <Text style={style.logEmoji}>{moodEmoji}</Text>
-        <Text style={style.logText}>{t(`mood_${item.emotion}`)}</Text>
+        <Text style={style.logText}>{moodTitle}</Text>
         <Text style={style.logTimestamp}>{date}</Text>
       </View>
     );
   };
 
-  // 6. Componente do Cabeçalho (Input de Humor)
   const ListHeader = () => (
     <View style={style.headerContainer}>
       <Text style={style.title}>{t('mood_log_title')}</Text>
       <Text style={style.subtitle}>{t('mood_log_subtitle')}</Text>
-      <View style={style.moodInputContainer}>
-        {MOOD_OPTIONS.map((mood) => (
-          <TouchableOpacity
-            key={mood.key}
-            style={style.moodButton}
-            onPress={() => handleAddMood(mood)}
-          >
-            <Text style={style.moodEmoji}>{mood.emoji}</Text>
-            <Text style={style.moodText}>{t(mood.titleKey)}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
       
-      {/* Mensagem de confirmação */}
+      {isLoading ? (
+          <ActivityIndicator color={theme.primary} size="large" style={{ margin: 20 }} />
+      ) : (
+          <View style={style.moodInputContainer}>
+            {moodOptions.map((mood) => (
+              <TouchableOpacity
+                key={mood.key}
+                style={style.moodButton}
+                onPress={() => handleAddMood(mood)}
+              >
+                <Text style={style.moodEmoji}>{mood.emoji}</Text>
+                <Text style={style.moodText}>{mood.title}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+      )}
+      
       {confirmation ? (
         <Text style={style.confirmationText}>{confirmation}</Text>
       ) : (
-        <View style={{ height: 20, marginTop: 15 }} /> // Espaçamento
+        <View style={{ height: 20, marginTop: 15 }} />
       )}
       
       <Text style={style.historyTitle}>{t('mood_log_history')}</Text>
@@ -100,7 +149,7 @@ const MoodDiaryScreen = () => {
   return (
     <SafeAreaView style={style.container}>
       <FlatList
-        data={moodLog} // O 'moodLog' vem do useUser()
+        data={moodLog}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         ListHeaderComponent={<ListHeader />}
@@ -113,7 +162,6 @@ const MoodDiaryScreen = () => {
   );
 };
 
-// 7. Estilos
 const styles = (theme) => StyleSheet.create({
   container: {
     flex: 1,
@@ -139,22 +187,31 @@ const styles = (theme) => StyleSheet.create({
   },
   moodInputContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'center',
     width: '100%',
+    flexWrap: 'wrap', // Permite que os botões quebrem linha se houver muitos
+    gap: 10,          // Espaçamento moderno
   },
   moodButton: {
     alignItems: 'center',
-    padding: 10,
-    borderRadius: 10,
+    padding: 12,
+    borderRadius: 12,
     backgroundColor: theme.card,
+    minWidth: 70,     // Garante tamanho mínimo
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   moodEmoji: {
-    fontSize: 30,
+    fontSize: 32,
+    marginBottom: 5,
   },
   moodText: {
     fontSize: 12,
     color: theme.text,
-    marginTop: 5,
+    fontWeight: '500',
   },
   confirmationText: {
     fontSize: 14,
@@ -162,43 +219,46 @@ const styles = (theme) => StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 15,
     height: 20,
+    textAlign: 'center',
   },
   historyTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: theme.text,
-    marginTop: 20,
+    marginTop: 25,
     alignSelf: 'flex-start',
-    
+    marginLeft: 10,
   },
   emptyText: {
     fontSize: 14,
     color: theme.subtleText,
     textAlign: 'center',
-    padding: 20,
+    padding: 40,
     fontStyle: 'italic',
-    marginTop: 20,
   },
   logItem: {
     backgroundColor: theme.card,
     flexDirection: 'row',
     alignItems: 'center',
     padding: 15,
-    marginHorizontal: 10,
+    marginHorizontal: 20,
     marginTop: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: theme.borderColor,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   logEmoji: {
     fontSize: 24,
-    marginRight: 10,
+    marginRight: 15,
   },
   logText: {
     flex: 1,
     fontSize: 16,
     color: theme.text,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   logTimestamp: {
     fontSize: 12,

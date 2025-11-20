@@ -14,8 +14,7 @@ import { useUser } from '../context/UserDataContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// 1. IMPORTAR DADOS LOCAIS E NETINFO
-import { useNetInfo } from '@react-native-community/netinfo';
+// 1. IMPORTAR DADOS LOCAIS
 import { mockChallenges } from '../constants/data';
 import i18nInstance from '../services/i18n';
 
@@ -24,30 +23,27 @@ const API_URL = 'https://acalmatea-api.vercel.app/api/challenges'; // MUDE PARA 
 const CACHE_KEY_PREFIX = 'cached_all_challenges_';
 
 // 3. FUNÇÃO DE DADOS "DE FÁBRICA" (OFFLINE)
-// Esta função traduz todo o objeto mockChallenges
 const getFactoryData = (lang) => {
   const translations = i18nInstance.getResourceBundle(lang, 'translation');
   if (!translations) return {};
 
-  const t = (key) => translations[key] || `[${key}]`;
+  const t = (key) => translations[key] || '...';
   const allChallenges = {};
 
-  // Itera sobre cada categoria (basic, communication, etc.)
   for (const [category, challengesRaw] of Object.entries(mockChallenges)) {
-    // Traduz cada desafio dentro da categoria
     allChallenges[category] = challengesRaw.map(item => ({
-      id: item.titleKey, // ID único
+      id: item.titleKey,
       title: t(item.titleKey),
       objective: t(item.objKey),
-      steps: item.stepKeys.map(stepKey => t(stepKey)), // Traduz o array de passos
+      steps: item.stepKeys.map(stepKey => t(stepKey)),
       extra: item.extraKey ? t(item.extraKey) : null,
-      category: category, // Adiciona a categoria ao próprio objeto
+      category: category,
     }));
   }
-  return allChallenges; // Retorna o objeto { basic: [...], communication: [...] }
+  return allChallenges;
 };
 
-// --- Componentes Auxiliares (Não mudam) ---
+// Componentes de Emojis e Lista Vazia (não mudam)
 const STATUS_EMOJI = { 'easy': '😊', 'medium': '😐', 'hard': '😟' };
 
 const EmptyList = ({ textKey, t }) => {
@@ -58,7 +54,6 @@ const EmptyList = ({ textKey, t }) => {
     </Text>
   );
 };
-// --- Fim dos Componentes Auxiliares ---
 
 
 const ChallengeListScreen = ({ route, navigation }) => {
@@ -71,9 +66,8 @@ const ChallengeListScreen = ({ route, navigation }) => {
   
   // 4. ESTADOS PARA OS DADOS
   const [isLoading, setIsLoading] = useState(true);
-  const [allChallenges, setAllChallenges] = useState({}); // Guarda o objeto { basic: [...], ... }
+  const [allChallenges, setAllChallenges] = useState({}); // Guarda { basic: [...], ... }
 
-  const netInfo = useNetInfo(); // Hook do NetInfo
   const currentLang = i18n.language;
   const CACHE_KEY = `${CACHE_KEY_PREFIX}${currentLang}`;
 
@@ -101,24 +95,15 @@ const ChallengeListScreen = ({ route, navigation }) => {
       setIsLoading(false);
 
       // 4. Tentar atualizar em segundo plano
-      if (netInfo.isConnected === false) {
-        console.log("(Challenges) Rede offline. Não vou buscar atualizações.");
-        return; // Sai da função
-      }
-
       try {
-        console.log("(Challenges) Rede online. Tentando buscar atualizações...");
         const response = await fetch(`${API_URL}?lang=${currentLang}`);
         if (!response.ok) throw new Error('Falha na rede');
         
         const newData = await response.json();
         
         if (JSON.stringify(newData) !== JSON.stringify(initialData)) {
-          console.log("(Challenges) Novos dados de desafios encontrados! Atualizando...");
           setAllChallenges(newData);
           await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(newData));
-        } else {
-          console.log("(Challenges) Dados de desafios já estão atualizados.");
         }
       } catch (e) {
         console.log("Não foi possível buscar atualizações de desafios.");
@@ -126,26 +111,23 @@ const ChallengeListScreen = ({ route, navigation }) => {
     };
 
     loadData();
-  }, [currentLang, CACHE_KEY, netInfo.isConnected]); // Adiciona netInfo.isConnected
+  }, [currentLang, CACHE_KEY]);
 
   // 6. LÓGICA DE FILTRAGEM (useMemo)
-  // Esta lógica agora funciona com o objeto 'allChallenges'
   const challenges = useMemo(() => {
-    // Junta todos os desafios de todas as categorias num único array
-    const allItems = Object.values(allChallenges).flat(); 
+    const allItems = Object.values(allChallenges).flat(); // Junta todos os desafios num só array
 
     if (categoryKey === 'favorites') {
       // Filtra todos os itens que estão marcados como favoritos
       return allItems.filter(challenge => isFavorite(challenge.id));
     }
     
-    // Se não for favoritos, filtra pela categoria que veio da rota
+    // Se não for favoritos, filtra por categoria
     return allItems.filter(challenge => challenge.category === categoryKey);
     
   }, [categoryKey, isFavorite, allChallenges]);
   
   // 7. RENDER ITEM (Simplificado)
-  // Agora só mostra os dados. Não traduz nada.
   const renderItem = ({ item }) => {
     const completionStatus = getChallengeCompletion(item.id); // Usa item.id
 
@@ -155,6 +137,7 @@ const ChallengeListScreen = ({ route, navigation }) => {
         // Passa o 'item' JÁ TRADUZIDO para o ecrã de detalhe
         onPress={() => navigation.navigate('ChallengeDetail', { challenge: item })}
       >
+        {/* Mostra o título já traduzido */}
         <Text style={style.menuText}>{item.title}</Text>
         
         {completionStatus ? (
@@ -189,7 +172,7 @@ const ChallengeListScreen = ({ route, navigation }) => {
   );
 };
 
-// ... (Cole os seus estilos originais aqui)
+
 const styles = (theme) => StyleSheet.create({
   container: {
     flex: 1,

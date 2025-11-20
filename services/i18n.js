@@ -1521,6 +1521,8 @@ const resources = {
       "poti_Rewards": "Welcome to the Shop! You can use your XP here to unlock new styles for me.",
       "rewards_equip_button": "Equip",
       "rewards_unequip_button": "Unequip",
+      "home_daily_event_advice": "Special Date or Tip of the Day",
+      "home_daily_highlight": "Highlight of the Day",
 
 
 
@@ -3044,6 +3046,8 @@ const resources = {
       "tab_settings": "Configurações",
       "rewards_equip_button": "Equipar",
       "rewards_unequip_button": "Remover",
+      "home_daily_event_advice": "Data Especial Ou Conselho do Dia",
+      "home_daily_highlight": "Destaque do Dia",
 
 
 
@@ -4603,6 +4607,8 @@ const resources = {
       "poti_Rewards": "¡Bienvenido a la Tienda! Aquí puedes usar tu XP para desbloquear nuevos estilos para mí.",
       "rewards_equip_button": "Equipar",
       "rewards_unequip_button": "Quitar",
+      "home_daily_event_advice": "Fecha especial o consejo del día",
+      "home_daily_highlight": "Lo más destacado del día",
 
     }
   },

@@ -38,7 +38,7 @@ const ChallengeDetailScreen = ({ route }) => {
   const navigation = useNavigation();
   
   // 2. RECEBER O DESAFIO JÁ TRADUZIDO
-  // O 'challenge' que vem dos route.params agora tem { id, title, objective, steps, extra, category }
+  // O 'challenge' que vem dos route.params agora tem { id, title, objective, steps, extra }
   const { challenge } = route.params;
   
   const { addXp, markChallengeCompleted, getChallengeCompletion } = useUser();
@@ -59,7 +59,6 @@ const ChallengeDetailScreen = ({ route }) => {
     });
   }, [navigation, challengeId, theme]);
 
-  // Funções handleCompleteChallenge e handleSelectDifficulty (Não mudam)
   const handleCompleteChallenge = () => {
     setModalVisible(true);
   };
@@ -92,7 +91,6 @@ const ChallengeDetailScreen = ({ route }) => {
           <View style={style.divider} />
           
           <Text style={style.label}>{t('instructions')}:</Text>
-          {/* 'challenge.steps' já é um array de strings traduzidas */}
           {challenge.steps.map((step, index) => (
             <Text key={index} style={style.stepText}>
               {/* O 't()' só é preciso para o "Passo X:" */}
@@ -101,7 +99,6 @@ const ChallengeDetailScreen = ({ route }) => {
             </Text>
           ))}
           
-          {/* Mostra a dica extra se ela existir */}
           {challenge.extra && (
             <>
               <View style={style.divider} />
@@ -125,7 +122,6 @@ const ChallengeDetailScreen = ({ route }) => {
           )}
         </View>
         
-        {/* Modal (não muda) */}
         <Modal
           transparent={true}
           animationType="fade"
@@ -171,7 +167,8 @@ const ChallengeDetailScreen = ({ route }) => {
   );
 };
 
-// ... (Cole os seus estilos originais aqui)
+// ... (os seus estilos 'styles' não mudam)
+// (Cole os seus estilos originais aqui)
 const styles = (theme) => StyleSheet.create({
   container: {
     flex: 1,

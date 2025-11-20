@@ -1,11 +1,19 @@
-import React, { useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, Animated, Image } from 'react-native';
+// components/PotiAssistant.js
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Animated, Image, TouchableOpacity, Easing } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useUser } from '../context/UserDataContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNetInfo } from '@react-native-community/netinfo';
 
-const screenToTextKey = {
+// --- SEU URL DA API AQUI ---
+const API_URL = 'https://acalmatea-api.vercel.app/api/tips'; 
+const CACHE_KEY = 'cached_poti_tips';
+
+// Mapeamento antigo (Fallback para offline)
+const FACTORY_TIPS = {
   'Home': 'poti_Home',
   'Expressions': 'poti_Expressions',
   'Comfort': 'poti_Comfort',
@@ -23,9 +31,7 @@ const screenToTextKey = {
   'Settings': 'poti_Settings',
 };
 
-const specialPositionScreens = [ 
-  // 'ChallengeDetail' 
-];
+const specialPositionScreens = [];
 
 const COLOR_TINTS = {
   'cor_vermelha': '#FF6347',
@@ -50,22 +56,80 @@ const ACCESSORY_EMOJIS = {
 
 const PotiAssistant = ({ activeScreen }) => {
   const { theme } = useTheme();
-  const { t } = useTranslation();
-  const popAnim = useRef(new Animated.Value(0)).current;
+  const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
-  
- // 1. Obter 'equippedItems' em vez de 'unlockedItems'
   const { equippedItems } = useUser();
   const style = styles(theme);
+
+  // --- ESTADOS DA API ---
+  const [allTips, setAllTips] = useState([]);
+  const [currentTipText, setCurrentTipText] = useState('');
+  const [showBubble, setShowBubble] = useState(false);
+
+  const netInfo = useNetInfo();
+  const timerRef = useRef(null);
+
+  // --- ANIMAÇÕES ---
+  const popAnim = useRef(new Animated.Value(0)).current;
+  const floatAnim = useRef(new Animated.Value(0)).current;
 
   const activeColorKey = equippedItems.color; 
   const activeColorTint = activeColorKey ? COLOR_TINTS[activeColorKey] : null;
 
-
   const activeAccessoryKey = equippedItems.accessory;
   const activeAccessoryEmoji = activeAccessoryKey ? ACCESSORY_EMOJIS[activeAccessoryKey] : null;
 
+  // --- EFEITOS ---
+
+  // 1. Carregar Dicas da API
   useEffect(() => {
+    const loadTips = async () => {
+      let dataToUse = [];
+      try {
+        const cached = await AsyncStorage.getItem(CACHE_KEY);
+        if (cached) dataToUse = JSON.parse(cached);
+      } catch (e) {}
+
+      // Se não houver cache ou API, converte o mapa antigo para o formato novo
+      if (!dataToUse.length) {
+        dataToUse = Object.keys(FACTORY_TIPS).map(screenKey => ({
+          screen: screenKey,
+          text: t(FACTORY_TIPS[screenKey]) // Traduz a chave antiga
+        }));
+      }
+      setAllTips(dataToUse);
+
+      if (netInfo.isConnected === false) return;
+
+      try {
+        const response = await fetch(`${API_URL}?lang=${i18n.language}`);
+        const newData = await response.json();
+        if (JSON.stringify(newData) !== JSON.stringify(dataToUse)) {
+          setAllTips(newData);
+          await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(newData));
+        }
+      } catch (e) { console.log('Erro Poti API'); }
+    };
+    loadTips();
+  }, [i18n.language, netInfo.isConnected]);
+
+  // Função Auxiliar para escolher dica
+  const pickRandomTip = () => {
+    const tipsForScreen = allTips.filter(tip => tip.screen === activeScreen);
+    
+    if (tipsForScreen.length > 0) {
+      const randomTip = tipsForScreen[Math.floor(Math.random() * tipsForScreen.length)];
+      setCurrentTipText(randomTip.text);
+    } else {
+      // Fallback se não houver dicas na API para esta tela
+      const fallbackKey = FACTORY_TIPS[activeScreen] || 'poti_Home';
+      setCurrentTipText(t(fallbackKey));
+    }
+  };
+
+  // 2. Escolher Dica Inicial (quando muda de tela)
+  useEffect(() => {
+    // Animação de entrada
     popAnim.setValue(0); 
     Animated.timing(popAnim, {
       toValue: 1,
@@ -73,21 +137,44 @@ const PotiAssistant = ({ activeScreen }) => {
       delay: 300,
       useNativeDriver: true,
     }).start();
-  }, [popAnim, activeScreen]); 
 
-  const textKey = screenToTextKey[activeScreen] || 'poti_Home'; 
+    // Escolhe uma dica inicial
+    pickRandomTip();
+    setShowBubble(true);
 
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setShowBubble(false), 5000);
+
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, [popAnim, activeScreen, allTips]);
+
+  // 3. Animação de Flutuar (Loop Infinito)
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(floatAnim, { toValue: -8, duration: 2000, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(floatAnim, { toValue: 0, duration: 2000, easing: Easing.inOut(Easing.quad), useNativeDriver: true })
+      ])
+    ).start();
+  }, [floatAnim]);
+
+  // --- INTERAÇÃO (MUDANÇA AQUI) ---
+  const handlePress = () => {
+    // 1. Sempre sorteia uma nova frase!
+    pickRandomTip();
+    
+    // 2. Garante que o balão aparece
+    setShowBubble(true);
+
+    // 3. Reinicia o timer de 5 segundos
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setShowBubble(false), 5000);
+  };
+
+  // --- POSICIONAMENTO ---
   const useSpecialPosition = specialPositionScreens.includes(activeScreen);
-
-  // --- MUDANÇA: LÓGICA DA POSIÇÃO DO POTI ---
-  // 1. Verifica se a tela atual é uma das que está nas ABAS
   const isTabScreen = ['HomeTab', 'MoodDiaryTab', 'RewardsTab', 'SettingsTab'].includes(activeScreen);
-
-  // 2. Define o espaçamento de baixo
-  // Se for uma tela de aba, sobe 80 (60 da aba + 20 de margem)
-  // Se for uma tela normal (ex: Expressions), sobe 20 (para ficar acima da barra de gestos)
   const bottomPadding = insets.bottom + (isTabScreen ? 80 : 20);
-  // --- FIM DA MUDANÇA ---
 
   const containerStyle = [
     style.container, 
@@ -95,43 +182,52 @@ const PotiAssistant = ({ activeScreen }) => {
       ? style.containerTopRight
       : [
           style.containerBottomLeft, 
-          // 3. Aplica o espaçamento calculado
           { bottom: bottomPadding }
         ],
     { 
       opacity: popAnim, 
-      transform: [{ scale: popAnim }] 
+      transform: [
+        { scale: popAnim },
+        { translateY: floatAnim } // Flutuação
+      ] 
     }
   ];
 
   return (
     <Animated.View style={containerStyle}>
-      <View style={style.potiImageContainer}> 
-        <Image 
-          source={require('../assets/poti-avatar.png')} 
-          style={[
-            style.characterImage,
-            activeColorTint ? { tintColor: activeColorTint } : {}
-          ]} 
-        />
-        {activeAccessoryEmoji && (
-          <Text style={style.accessoryEmoji}>{activeAccessoryEmoji}</Text>
-        )}
-      </View>
       
-      <View style={style.bubble}>
-        <Text style={style.bubbleText}>{t(textKey)}</Text>
-      </View>
+      <TouchableOpacity 
+        onPress={handlePress} 
+        activeOpacity={0.9} 
+        style={{ flexDirection: 'row', alignItems: 'flex-end' }}
+      >
+        <View style={style.potiImageContainer}> 
+          <Image 
+            source={require('../assets/poti-avatar.png')} 
+            style={[
+              style.characterImage,
+              activeColorTint ? { tintColor: activeColorTint } : {}
+            ]} 
+          />
+          {activeAccessoryEmoji && (
+            <Text style={style.accessoryEmoji}>{activeAccessoryEmoji}</Text>
+          )}
+        </View>
+        
+        {showBubble && (
+          <View style={style.bubble}>
+            <Text style={style.bubbleText}>{currentTipText}</Text>
+          </View>
+        )}
+
+      </TouchableOpacity>
     </Animated.View>
   );
 };
 
-
 const styles = (theme) => StyleSheet.create({
   container: {
     position: 'absolute',
-    flexDirection: 'row', 
-    alignItems: 'flex-end', 
     zIndex: 10, 
   },
   containerBottomLeft: { 
