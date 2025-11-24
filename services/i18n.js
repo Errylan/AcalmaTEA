@@ -4614,14 +4614,31 @@ const resources = {
   },
 };
 
+// 1. Pegamos o idioma do dispositivo
+const deviceLanguage = Localization.getLocales()[0].languageCode;
+
+// 2. Lista de idiomas que o seu app suporta
+const supportedLanguages = ['en', 'pt', 'es'];
+
+// 3. Lógica de segurança:
+// Se o idioma do celular estiver na lista, usa ele.
+// Se não estiver (ex: francês 'fr', alemão 'de'), usa 'en' como padrão.
+const languageToUse = supportedLanguages.includes(deviceLanguage) ? deviceLanguage : 'en';
+
 i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: Localization.getLocales()[0].languageCode,
+    // 4. Usamos a variável segura aqui
+    lng: languageToUse, 
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false,
+    },
+    // Adiciona compatibilidade para garantir que não falhe se faltar algo
+    compatibilityJSON: 'v3', 
+    react: {
+      useSuspense: false, // Evita erros de carregamento no Android
     },
   });
 
