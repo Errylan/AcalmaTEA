@@ -4,11 +4,11 @@
     "slug": "AcalmaTEA",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/logo.png",
+    "icon": "./assets/logo_icons.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/logo-icon.png",
+      "image": "./assets/logo_icons.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -18,14 +18,14 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo-icon.png",
+        "foregroundImage": "./assets/logo_icons.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": false,
       "package": "com.errylan.AcalmaTEA"
     },
     "web": {
-      "favicon": "./assets/logo-icon.png"
+      "favicon": "./assets/logo_icons.png"
     },
     "plugins": [
       "expo-localization",
