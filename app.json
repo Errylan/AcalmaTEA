@@ -17,6 +17,7 @@
       "userInterfaceStyle": "automatic"
     },
     "android": {
+      "icon": "./assets/logo_icons.png",
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo_icons.png",
         "backgroundColor": "#ffffff"
