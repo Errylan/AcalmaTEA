@@ -17,9 +17,9 @@
       "userInterfaceStyle": "automatic"
     },
     "android": {
-      "icon": "./assets/logo_icons.png",
+      "icon": "./assets/logo_final.png",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo_icons.png",
+        "foregroundImage": "./assets/logo_final.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": false,
