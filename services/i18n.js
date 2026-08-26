@@ -55,7 +55,7 @@ const resources = {
       'exp_cost_eyes_example': "That new phone cost an arm and a leg.",
       'exp_ace_it_term': "To ace it / To breeze through it",
       'exp_ace_it_meaning': "To do something with extreme ease.",
-      'exp_ace_it_example': "He studied hard and aced the test.",
+      'exp_ace_it_example': "He studied hard and he aced the test.",
       'exp_troll_term': "To troll",
       'exp_troll_meaning': "(Internet slang) To provoke or deceive someone for fun.",
       'exp_troll_example': "His friend trolled him by pretending to forget his birthday.",
