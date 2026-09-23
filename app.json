@@ -31,8 +31,9 @@
     "plugins": [
       "expo-localization",
       "expo-video",
-      "expo-navigation-bar"
-
+      "expo-navigation-bar",
+      "expo-font",
+      "expo-status-bar"
     ],
     "extra": {
       "eas": {
